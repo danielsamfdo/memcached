@@ -1,0 +1,33 @@
+Specification : 
+
+Key Size : 250 & must not include control characters or whitespace
+
+Text lines are used for commands from clients and responses from servers
+
+Caching connections on client end will eliminate the overhead associated with establishing a TCP connection
+
+The server will transmit back unstructured data in exactly the same way it received it, as a byte stream.
+
+Text lines are always terminated by \r\n. Unstructured data is _also_terminated by \r\n, even though \r, \n or any other 8-bit characters may also appear inside the data.
+
+when a client retrieves data from a server, it must use the length of the data block (which it will be provided with) to determine where the data block ends, and not the fact that \r\n follows the end of the data block, even though it does
+
+
+A command line always starts with the name of the command, followed by parameters (if any) delimited by whitespace. Command names are lower-case and are case-sensitive.Command names are lower-case and are case-sensitive.
+
+
+Storage Size : "set", "add", "replace", "append", "prepend" and "cas"
+Requirements:
+1) Client sends command line
+2) Client sends data block
+3) Response to client : "success" or "failure"
+
+
+Retrieval commands : "get" and "gets"
+Requirements:
+1) Client sends command line with all the requested keys
+2) Client sends data block
+3) Response to client : "success" or "failure"
+4) one response line with information about the item, and one data block with the item's data; this continues until the server finished with the "END" response line.
+
+
