@@ -1,6 +1,5 @@
 a.out
-server.o
-client.o
+*.o
 cmake-build-debug
 .idea
 
