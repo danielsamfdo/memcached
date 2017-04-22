@@ -1,4 +1,4 @@
-//Ref - http://www.geeksforgeeks.org/socket-programming-cc/
+//For reference only, Ref - http://www.geeksforgeeks.org/socket-programming-cc/
 #include <iostream>
 #include <cstdlib>
 #include <sys/socket.h>
