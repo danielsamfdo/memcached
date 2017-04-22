@@ -1,6 +1,6 @@
 //Ref - http://stackoverflow.com/a/2235618/1026535
-#ifndef LOG_UTIL_H
-#define LOG_UTIL_H
+#ifndef MEMCACHED_CLONE_BRUTE_FORCE_LOG_UTIL_H
+#define MEMCACHED_CLONE_BRUTE_FORCE_LOG_UTIL_H
 #include <iostream>
 #include <sstream>
 #include <iomanip>
@@ -51,4 +51,4 @@ Logger& Logger::operator<<(T a) {
 Logger log_error("ERROR");
 Logger log_info("INFO");
 
-#endif
+#endif //MEMCACHED_CLONE_BRUTE_FORCE_LOG_UTIL_H

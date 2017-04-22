@@ -1,5 +1,5 @@
-#ifndef STR_UTIL_H
-#define STR_UTIL_H
+#ifndef MEMCACHED_CLONE_BRUTE_FORCE_STR_UTIL_H
+#define MEMCACHED_CLONE_BRUTE_FORCE_STR_UTIL_H
 
 using namespace std;
 
@@ -10,4 +10,4 @@ bool ends_with(const std::string &str, const std::string &suffix)
            str.compare(str.size() - suffix.size(), suffix.size(), suffix) == 0;
 }
 
-#endif
+#endif //MEMCACHED_CLONE_BRUTE_FORCE_STR_UTIL_H
