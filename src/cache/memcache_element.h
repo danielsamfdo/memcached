@@ -1,8 +1,10 @@
 #ifndef MEMCACHED_CLONE_BRUTE_FORCE_MEMCACHE_ELEMENT_H
 #define MEMCACHED_CLONE_BRUTE_FORCE_MEMCACHE_ELEMENT_H
 
+#include <cstdint>
+
 struct MemcacheElement {
-    byte *block;
+    uint8_t *block;
 };
 
 #endif //MEMCACHED_CLONE_BRUTE_FORCE_MEMCACHE_ELEMENT_H

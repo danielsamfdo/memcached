@@ -6,16 +6,17 @@
 #include <sys/socket.h>
 #include <common/log_util.h>
 #include "memcache_element.h"
+#include <unordered_map>
 
 using namespace std;
 
 class Memcache {
 
 private:
-    unorded_map<string, MemcacheElement> cache;
+    unordered_map<string, MemcacheElement> cache;
 
 public:
-    string process_command(string command);
+    string process_command(int socket, string command);
 };
 
 #include "memcache.cpp"
