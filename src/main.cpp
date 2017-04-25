@@ -4,5 +4,5 @@ int main(int arg_count, char const *argv[]) {
 
     int port = 8080;
 
-    MemcacheServer server(port);
+    MemcacheServer server(port, 1);
 }
