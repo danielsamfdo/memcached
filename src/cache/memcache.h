@@ -15,6 +15,8 @@ class Memcache {
 private:
     unordered_map<string, MemcacheElement> cache;
 
+    MemcacheElement store_fill(vector<string> tokens);
+
 public:
     string process_command(int socket, string command);
     string process_set(int socket, vector<string> tokens);
