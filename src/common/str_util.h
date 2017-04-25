@@ -25,4 +25,15 @@ vector<string> tokenize(string command) {
 
     return tokens;
 }
+
+template <typename T>
+T str_cast(string str) {
+
+    T var;
+    istringstream buffer(str);
+    buffer >> var;
+
+    return var;
+}
+
 #endif //MEMCACHED_CLONE_BRUTE_FORCE_STR_UTIL_H
