@@ -17,6 +17,8 @@ private:
 
 public:
     string process_command(int socket, string command);
+    string process_set(int socket, vector<string> tokens);
+    string process_add(int socket, vector<string> tokens);
 };
 
 #include "memcache.cpp"
