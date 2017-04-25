@@ -7,7 +7,6 @@
 #include <netinet/in.h>
 #include <unistd.h>
 #include <arpa/inet.h>
-#include <boost/algorithm/string/predicate.hpp>
 #include <common/log_util.h>
 #include <common/str_util.h>
 
