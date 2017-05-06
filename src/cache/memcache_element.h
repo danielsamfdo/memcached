@@ -4,7 +4,7 @@
 #include <cstdint>
 
 struct MemcacheElement {
-    uint8_t *block;
+    shared_ptr<const char> block;
     uint16_t flags;
     unsigned long long int exptime;
     int bytes;

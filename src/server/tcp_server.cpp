@@ -1,11 +1,11 @@
 #include <thread>
+#include <errno.h>
+#include <string.h>
 
-TCPServer::TCPServer(int port) {
-    this->port = port;
+TCPServer::TCPServer() {
 }
 
-TCPServer::TCPServer(int port, int max_conn_backlog) {
-    this->port = port;
+TCPServer::TCPServer(int max_conn_backlog) {
     this->max_conn_backlog = max_conn_backlog;
 }
 
@@ -22,21 +22,25 @@ void TCPServer::setup() {
         exit(-1);
     }
 
+    log_info << "Server Socket "<< server_socket <<endl;
+
     int options = 1;
-    if(setsockopt(server_socket, SOL_SOCKET, SO_REUSEADDR | SO_REUSEPORT,
-                  &options, sizeof(options))) {
+    if(setsockopt(server_socket, SOL_SOCKET, SO_REUSEPORT,
+                   &options, sizeof(options))) {
+        log_error << "Oh dear, something went wrong with setting socket options()! :: " << strerror(errno) << endl;
         log_error  << "Failed to set socket options" << endl;
         exit(-1);
     }
 
     socket_address.sin_family = AF_INET;
     socket_address.sin_addr.s_addr = INADDR_ANY;
-    socket_address.sin_port = htons(port);
+    socket_address.sin_port = htons(PORT);
 
     int bind_return = ::bind(server_socket, (struct sockaddr *)&socket_address,
                            sizeof(socket_address));
 
     if(bind_return < 0) {
+        log_error << "Oh dear, something went wrong with binding server()! :: " << strerror(errno) << endl;
         log_error  << "Failed to bind server" << endl;
         exit(-1);
     }
@@ -48,7 +52,7 @@ void TCPServer::setup() {
         exit(-1);
     }
 
-    log_info << "Server is up and listening on PORT " << port << endl;
+    log_info << "Server is up and listening on PORT" << endl;
 }
 
 void TCPServer::start() {

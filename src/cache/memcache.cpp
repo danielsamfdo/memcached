@@ -26,6 +26,9 @@ string Memcache::process_set(int socket, vector<string> tokens) {
     tokens.erase(tokens.begin());
 
     MemcacheElement element = store_fill(tokens);
+    string block = read_len(socket, element.bytes);
+    element.block = shared_ptr<const char>(block.c_str());
+
     bool no_reply = tokens.back() == "noreply";
 
     cache[key] = element; //update stats!
