@@ -6,6 +6,7 @@ MemcacheServer::MemcacheServer(int cache_type, int max_conn_backlog) : TCPServer
     init(cache_type);
 }
 
+
 void MemcacheServer::init(int cache_type) {
     suffix = "\r\n";
 

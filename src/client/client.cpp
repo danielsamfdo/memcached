@@ -16,7 +16,7 @@ int main(int arg_count, char const *argv[]) {
     int client_socket, read_len, connect_return;
     struct sockaddr_in server_address;
     char buffer[1024] = {0};
-    string client_message ("Hello from client! Mujhse fraandship karoge ?\r\n");
+    string client_message ("set daniel 10200 0 5000 10000 [noreply]\r\n");
 
     client_socket = socket(AF_INET, SOCK_STREAM, 0);
 
@@ -44,6 +44,8 @@ int main(int arg_count, char const *argv[]) {
 
     log_info << "Connected to server, telling him " << client_message.c_str() << endl;
     send(client_socket, client_message.c_str(), client_message.size(), 0);
+
+
     log_info << "Done, waiting to hear back" << endl;
 
     string message;
@@ -53,6 +55,9 @@ int main(int arg_count, char const *argv[]) {
         read_len = read(client_socket, buffer, 1024);
         //message.append(buffer);
     //}
+
+    client_message = "get daniel 10200 0 5000 10000 [noreply]\r\n";
+    send(client_socket, client_message.c_str(), client_message.size(), 0);
 
     log_info << "Server said : " << buffer << endl;
     log_info << "Time to die" << endl;
