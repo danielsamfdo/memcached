@@ -6,7 +6,7 @@
 struct MemcacheElement {
     shared_ptr<const char> block;
     uint16_t flags;
-    int exptime;
+    unsigned long long int exptime;
     int bytes;
     uint64_t cas_unique;
 };
