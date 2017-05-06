@@ -1,4 +1,5 @@
 string Memcache::process_command(int socket, string command) {
+    log_info << "Processing command " << command.c_str() << endl;
 
     vector<string> tokens = tokenize(command);
     string command_type = tokens[0], output;
@@ -11,7 +12,9 @@ string Memcache::process_command(int socket, string command) {
     else if(command_type == "add") {
         output = process_add(socket, tokens);
     }
-
+    else {
+        output = "Hello";
+    }
     return output;
 }
 
