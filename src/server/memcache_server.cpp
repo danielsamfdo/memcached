@@ -13,6 +13,7 @@ void MemcacheServer::init(int cache_type) {
     switch(cache_type) {
         case 1: {
             shared_ptr<LRUCache> lru = make_shared<LRUCache>();
+            log_info << "Starting LRU CACHE MEMCACHED " << endl;
             cache = lru;
             break;
         }
