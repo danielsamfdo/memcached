@@ -38,7 +38,13 @@ string Memcache::process_set(int socket, vector<string> tokens) {
 }
 
 string Memcache::process_add(int socket, vector<string> tokens) {
+    string output = "";
+    return output;
+}
 
+string Memcache::process_get(int socket, vector<string> tokens) {
+    string output = "";
+    return output;
 }
 
 MemcacheElement Memcache::store_fill(vector<string> tokens) {
