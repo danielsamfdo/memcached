@@ -2,7 +2,7 @@
 
 int main(int arg_count, char const *argv[]) {
 
-    int port = 8080;
-
-    MemcacheServer server(port, 1);
+    MemcacheServer server(1);
+    server.setup();
+    server.start();
 }
