@@ -33,7 +33,7 @@ void TCPServer::setup() {
     socket_address.sin_addr.s_addr = INADDR_ANY;
     socket_address.sin_port = htons(port);
 
-    int bind_return = bind(server_socket, (struct sockaddr *)&socket_address,
+    int bind_return = ::bind(server_socket, (struct sockaddr *)&socket_address,
                            sizeof(socket_address));
 
     if(bind_return < 0) {

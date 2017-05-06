@@ -44,7 +44,8 @@ void MemcacheServer::process_conn(int socket) {
 string MemcacheServer::read_command(int socket) {
 
     string command;
-    char buffer[max_read_len] = {0};
+    char buffer[max_read_len];
+    memset( buffer, 0, max_read_len*sizeof(char) );
 
     while(!ends_with(command, suffix)) {
         int read_len = read(socket, buffer, max_read_len);
