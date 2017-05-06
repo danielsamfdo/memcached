@@ -9,15 +9,21 @@
 #include <unordered_map>
 #include "statistics.h"
 using namespace std;
+enum OPERATIONS{set=1,get,add};
 
 class Memcache {
 
 private:
     unordered_map<string, MemcacheElement> cache;
-
     MemcacheElement store_fill(vector<string> tokens);
+    unordered_map<string, int > operation;
 
 public:
+    Memcache(){
+        operation.insert(pair<string,int>("set",OPERATIONS::set) );
+        operation.insert(pair<string,int>("get",OPERATIONS::get) );
+        operation.insert(pair<string,int>("add",OPERATIONS::add) );
+    }
     Statistics memcache_stats;
     string process_command(int socket, string command);
     // Storage commands

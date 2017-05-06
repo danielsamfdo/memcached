@@ -6,6 +6,7 @@ MemcacheServer::MemcacheServer(int cache_type, int port, int max_conn_backlog) :
     init(cache_type);
 }
 
+
 void MemcacheServer::init(int cache_type) {
     max_read_len = 10;
     suffix = "\r\n";
