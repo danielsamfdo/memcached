@@ -7,6 +7,9 @@
 #include <common/log_util.h>
 #include "memcache_element.h"
 #include <unordered_map>
+#include <common/log_util.h>
+#include <common/io_util.h>
+
 #include "statistics.h"
 using namespace std;
 enum OPERATIONS{set=1,get,add};

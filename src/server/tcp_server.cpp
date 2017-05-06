@@ -2,12 +2,10 @@
 #include <errno.h>
 #include <string.h>
 
-TCPServer::TCPServer(int port) {
-    this->port = port;
+TCPServer::TCPServer() {
 }
 
-TCPServer::TCPServer(int port, int max_conn_backlog) {
-    this->port = port;
+TCPServer::TCPServer(int max_conn_backlog) {
     this->max_conn_backlog = max_conn_backlog;
 }
 
@@ -36,7 +34,7 @@ void TCPServer::setup() {
 
     socket_address.sin_family = AF_INET;
     socket_address.sin_addr.s_addr = INADDR_ANY;
-    socket_address.sin_port = htons(port);
+    socket_address.sin_port = htons(PORT);
 
     int bind_return = ::bind(server_socket, (struct sockaddr *)&socket_address,
                            sizeof(socket_address));
@@ -54,7 +52,7 @@ void TCPServer::setup() {
         exit(-1);
     }
 
-    log_info << "Server is up and listening on PORT " << port << endl;
+    log_info << "Server is up and listening on PORT" << endl;
 }
 
 void TCPServer::start() {
