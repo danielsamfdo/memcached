@@ -32,7 +32,7 @@ string Memcache::process_command(int socket, string command) {
             break;
         case OPERATIONS::replace :
             log_info << "REPLACE METHOD " << endl;
-            output = process_add(socket, tokens);
+            output = process_replace(socket, tokens);
             break;
         case OPERATIONS::cas :
             log_info << "CAS METHOD " << endl;
@@ -81,8 +81,34 @@ string Memcache::process_prepend(int socket, vector<string> keys) {
     return "";
 }
 
-string Memcache::process_replace(int socket, vector<string> keys) {
-    return "";
+string Memcache::process_replace(int socket, vector<string> tokens) {
+    string output = "";
+    unordered_map<string, MemcacheElement>::iterator cache_iterator;
+    string key = tokens[0];
+    tokens.erase(tokens.begin());
+
+    cache_iterator = cache.find(key);
+    if ( cache_iterator == cache.end() ){
+        log_info <<key<<" is the key we try to replace" << endl;
+        MemcacheElement element = store_fill(tokens);
+        string block = read_len(socket, element.bytes);
+        element.block = (block.c_str());
+
+        bool no_reply = tokens.back() == "noreply";
+
+        cache[key] = element; //update stats!
+        log_info << "Stored for key " << key << element.block << endl;
+        if(! no_reply) {
+            output = "STORED";
+        }
+
+        return output;
+    }
+    else{
+        // NO ACTION SHOULD BE DONE
+    }
+
+    return output;
 }
 
 string Memcache::process_cas(int socket, vector<string> keys) {

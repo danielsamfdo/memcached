@@ -20,6 +20,7 @@ private:
     unordered_map<string, MemcacheElement> cache;
     MemcacheElement store_fill(vector<string> tokens);
     unordered_map<string, int > operation;
+    
 
 public:
     Memcache(){
