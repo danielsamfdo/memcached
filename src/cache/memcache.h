@@ -12,7 +12,7 @@
 
 #include "statistics.h"
 using namespace std;
-enum OPERATIONS{set=1, add, replace, append, prepend, cas, get};
+enum OPERATIONS{set=1, add=2, replace=3, append=4, prepend=5, cas=6, get=7, version=8, quit=9, bg_gets=10, del=11, incr=12, decr=13, flush_all=14};
 
 class Memcache {
 
@@ -31,6 +31,13 @@ public:
         operation.insert(pair<string,int>("append",OPERATIONS::append) );
         operation.insert(pair<string,int>("prepend",OPERATIONS::prepend) );
         operation.insert(pair<string,int>("cas",OPERATIONS::cas) );
+        operation.insert(pair<string,int>("version",OPERATIONS::version) );
+        operation.insert(pair<string,int>("quit",OPERATIONS::quit) );
+        operation.insert(pair<string,int>("flush_all",OPERATIONS::flush_all) );
+        operation.insert(pair<string,int>("gets",OPERATIONS::bg_gets) );
+        operation.insert(pair<string,int>("delete",OPERATIONS::del) );
+        operation.insert(pair<string,int>("incr",OPERATIONS::incr) );
+        operation.insert(pair<string,int>("decr",OPERATIONS::decr) );
         // cas_uniq_counter = 0 ;
     }
     Statistics memcache_stats;
@@ -46,6 +53,16 @@ public:
 
     // Retrieval commands
     string process_get(int socket, vector<string> tokens);
+    string process_gets(int socket, vector<string> tokens);
+    string process_delete(int socket, vector<string> tokens);
+    string process_incr(int socket, vector<string> tokens);
+    string process_decr(int socket, vector<string> tokens);
+
+
+    // Misc Commands
+    string process_version();
+    void process_flush_all();
+    void process_quit();
 };
 
 #include "memcache.cpp"

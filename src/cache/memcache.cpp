@@ -40,6 +40,34 @@ string Memcache::process_command(int socket, string command) {
             log_info << "CAS METHOD " << endl;
             output = process_cas(socket, tokens);
             break;
+        case OPERATIONS::version :
+            log_info << "VERSION METHOD " << endl;
+            output = process_version();
+            break;
+        case OPERATIONS::quit :
+            log_info << "QUIT METHOD " << endl;
+            process_quit();
+            break;
+        case OPERATIONS::flush_all :
+            log_info << "FLUSH ALL METHOD " << endl;
+            process_flush_all();
+            break;
+        case OPERATIONS::bg_gets :
+            log_info << "GETS METHOD " << endl;
+            output = process_gets(socket, tokens);
+            break;
+        case OPERATIONS::incr :
+            log_info << "INCR METHOD " << endl;
+            output = process_incr(socket, tokens);
+            break;
+        case OPERATIONS::decr :
+            log_info << "DECR METHOD " << endl;
+            output = process_decr(socket, tokens);
+            break;
+        case OPERATIONS::del :
+            log_info << "DELETE METHOD " << endl;
+            output = process_decr(socket, tokens);
+            break;
         default:
             log_info << "NO OTHER METHOD " << endl;
             output = "ERROR";
@@ -286,4 +314,29 @@ MemcacheElement Memcache::store_fill(vector<string> tokens) {
     element.bytes = str_cast<int>(tokens[2]);
     element.cas_unique = Memcache::get_cas_counter();
     return element;
+}
+
+string Memcache::process_version(){
+    return "1.5.8";
+}
+
+void Memcache::process_quit(){
+    return;
+    // return "1.5.8";
+}
+
+void Memcache::process_flush_all(){
+    return ;
+}
+
+string Memcache::process_delete(int socket, vector<string> keys){
+    return "";
+}
+
+string Memcache::process_incr(int socket, vector<string> keys){
+    return "";
+}
+
+string Memcache::process_decr(int socket, vector<string> keys){
+    return "";
 }
