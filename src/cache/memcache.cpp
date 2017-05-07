@@ -24,11 +24,11 @@ string Memcache::process_command(int socket, string command) {
             break;
         case OPERATIONS::append :
             log_info << "APPEND METHOD " << endl;
-            output = process_add(socket, tokens);
+            output = process_append(socket, tokens);
             break;
         case OPERATIONS::prepend :
             log_info << "PREPEND METHOD " << endl;
-            output = process_add(socket, tokens);
+            output = process_prepend(socket, tokens);
             break;
         case OPERATIONS::replace :
             log_info << "REPLACE METHOD " << endl;
@@ -54,7 +54,8 @@ string Memcache::process_set(int socket, vector<string> tokens) {
     tokens.erase(tokens.begin());
 
     MemcacheElement element = store_fill(tokens);
-    string block = read_len(socket, element.bytes);
+    string block = read_len(socket, element.bytes+2);
+    block = block.substr(0,block.size()-2); 
     element.block = (block.c_str());
 
     bool no_reply = tokens.back() == "noreply";
@@ -78,7 +79,8 @@ string Memcache::process_add(int socket, vector<string> tokens) {
     if ( cache_iterator == cache.end() ){
         log_info << key <<" is the key we try to add " << endl;
         MemcacheElement element = store_fill(tokens);
-        string block = read_len(socket, element.bytes);
+        string block = read_len(socket, element.bytes+2);
+        block = block.substr(0,block.size()-2); 
         element.block = (block.c_str());
 
         bool no_reply = tokens.back() == "noreply";
@@ -102,12 +104,73 @@ string response_get(string key, MemcacheElement elt){
     return "VALUE " + key + " " + to_string(elt.flags) + " " + to_string(elt.bytes)  + "\r\n";
 }
 
-string Memcache::process_append(int socket, vector<string> keys) {
-    return "";
+void update_store_fill(MemcacheElement *element,vector<string> tokens){
+    log_info << " FLAGS " << str_cast<uint16_t>(tokens[0]) << endl;
+    element->flags = str_cast<uint16_t>(tokens[0]);
+    log_info << " EXP TIME " << str_cast<int>(tokens[1]) << endl;
+    element->exptime = str_cast<int>(tokens[1]);
+    element->bytes += str_cast<int>(tokens[2]);
+    log_info << " BYTES " << element->bytes << endl;
 }
 
-string Memcache::process_prepend(int socket, vector<string> keys) {
-    return "";
+string Memcache::process_append(int socket, vector<string> tokens) {
+    string output = "";
+    unordered_map<string, MemcacheElement>::iterator cache_iterator;
+    string key = tokens[0];
+    tokens.erase(tokens.begin());
+
+    cache_iterator = cache.find(key);
+    if ( cache_iterator == cache.end() ){
+        // NO ACTION SHOULD BE DONE
+    }
+    else{
+        MemcacheElement element = cache_iterator->second;
+        log_info <<key<<" is the key we try to append" << endl;
+        update_store_fill(&element, tokens);
+        string block = read_len(socket, str_cast<int>(tokens[2])+2);
+        block = block.substr(0,block.size()-2); 
+        element.block += (block.c_str());
+
+        bool no_reply = tokens.back() == "noreply";
+
+        cache[key] = element; //update stats!
+        log_info << "Stored for key " << key << element.block << endl;
+        if(! no_reply) {
+            output = "STORED";
+        }
+        return output;
+    }
+    return output;
+}
+
+string Memcache::process_prepend(int socket, vector<string> tokens) {
+    string output = "";
+    unordered_map<string, MemcacheElement>::iterator cache_iterator;
+    string key = tokens[0];
+    tokens.erase(tokens.begin());
+
+    cache_iterator = cache.find(key);
+    if ( cache_iterator == cache.end() ){
+        // NO ACTION SHOULD BE DONE
+    }
+    else{
+        MemcacheElement element = cache_iterator->second;
+        log_info <<key<<" is the key we try to prepend" << endl;
+        update_store_fill(&element, tokens);
+        string block = read_len(socket, str_cast<int>(tokens[2])+2);
+        block = block.substr(0,block.size()-2); 
+        element.block = (block.c_str()) + element.block;
+
+        bool no_reply = tokens.back() == "noreply";
+
+        cache[key] = element; //update stats!
+        log_info << "Stored for key " << key << element.block << endl;
+        if(! no_reply) {
+            output = "STORED";
+        }
+        return output;
+    }
+    return output;
 }
 
 string Memcache::process_replace(int socket, vector<string> tokens) {
@@ -123,7 +186,8 @@ string Memcache::process_replace(int socket, vector<string> tokens) {
     else{
         log_info <<key<<" is the key we try to replace" << endl;
         MemcacheElement element = store_fill(tokens);
-        string block = read_len(socket, element.bytes);
+        string block = read_len(socket, element.bytes+2);
+        block = block.substr(0,block.size()-2); 
         element.block = (block.c_str());
 
         bool no_reply = tokens.back() == "noreply";

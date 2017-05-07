@@ -20,7 +20,7 @@ private:
     unordered_map<string, MemcacheElement> cache;
     MemcacheElement store_fill(vector<string> tokens);
     unordered_map<string, int > operation;
-    
+
 
 public:
     Memcache(){
@@ -29,7 +29,7 @@ public:
         operation.insert(pair<string,int>("add",OPERATIONS::add) );
         operation.insert(pair<string,int>("replace",OPERATIONS::replace) );
         operation.insert(pair<string,int>("append",OPERATIONS::append) );
-        operation.insert(pair<string,int>("prepend",OPERATIONS::append) );
+        operation.insert(pair<string,int>("prepend",OPERATIONS::prepend) );
         operation.insert(pair<string,int>("cas",OPERATIONS::cas) );
     }
     Statistics memcache_stats;
