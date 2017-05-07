@@ -82,14 +82,17 @@ unsigned long long Memcache::get_cas_counter(){
 
 int Memcache::get_memory(size_t mem_need)
 {
+
     if (capacity-memcache_stats.allocated>=mem_need)
     {
+        
         return 1;
     }
     //Take care of expired items if time permits
     else
     {
-        return 0;//Evict(mem_need);
+
+        return Evict(mem_need);
     }
 }
 
@@ -99,6 +102,17 @@ uint64_t Memcache::get_time()
     Returns current timestamp in seconds
     */
     return uint64_t((Time_obj::now()-time_start).count());
+}
+
+int Memcache::Evict(size_t mem_need)
+{
+    
+    return 0;
+}
+
+void Memcache::UpdateCache(string key,MemcacheElement *e, uint64_t pt)
+{
+    log_info << "shit got real1" <<endl;
 }
 
 string Memcache::process_set(int socket, vector<string> tokens) {
@@ -118,6 +132,7 @@ string Memcache::process_set(int socket, vector<string> tokens) {
 
     // Get the memory cleared if cache is full
     size_t mem_need = element.bytes;
+
     if (get_memory(mem_need))
     {
         cache[key] = element; //update stats!
@@ -126,7 +141,7 @@ string Memcache::process_set(int socket, vector<string> tokens) {
             output = "STORED";
         }
         memcache_stats.allocated += mem_need;
-        //UpdateCache(key,&element, get_time());
+        UpdateCache(key,&element, get_time());
     }
 
     return output;
@@ -334,6 +349,7 @@ string Memcache::process_get(int socket, vector<string> keys) {
     log_info << output << endl;
 
     return output;
+    // return "yo";
 }
 
 void Memcache::store_fill(vector<string> tokens, MemcacheElement *element) {

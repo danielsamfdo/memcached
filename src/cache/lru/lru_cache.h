@@ -30,17 +30,18 @@ public:
 	{
 		head = nullptr;
 		tail = nullptr;
-		
+		log_info << "shit got real"<<endl;
 	}
 
-private:
+// private:
 
 	TimeNode **head;
 	TimeNode **tail;
 
-	void UpdateCache(string key,MemcacheElement* e, uint64_t pt)
+	void UpdateCache(string key,MemcacheElement *e, uint64_t pt)
 	{
 		//Delete the key in the past timestamp
+		log_info << "shit got real" <<endl;
 		TimeNode *t = e->lastaccess;
 		if (t!=nullptr)
 		{
@@ -83,6 +84,7 @@ private:
 		Return:
 		:: returns 1 if evicted the needed memory else returns 0
 		*/
+
 		size_t claimed = 0;
 		while(claimed<mem_need)
 		{

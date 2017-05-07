@@ -25,7 +25,7 @@ protected:
     
     unordered_map<string, int > operation;
     static unsigned long long cas_uniq_counter;
-    size_t capacity = 10;
+    size_t capacity = 30;
     typedef std::chrono::high_resolution_clock Time_obj;
     typedef std::chrono::high_resolution_clock::time_point time_p;
 
@@ -58,7 +58,7 @@ public:
     int get_memory(size_t mem_need);
     uint64_t get_time();
     int Evict(size_t mem_need);
-    void UpdateCache(string key,MemcacheElement* e, uint64_t pt);
+    void UpdateCache(string key,MemcacheElement *e, uint64_t pt);
 
     string response_get(string key, MemcacheElement elt);
     void update_store_fill(MemcacheElement *element,vector<string> tokens);
