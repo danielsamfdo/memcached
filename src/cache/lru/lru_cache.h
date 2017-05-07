@@ -4,28 +4,28 @@
 #include <cache/memcache.h>
 #include <vector>
 
-struct TimeNode
+/*struct TimeNode
 {
-	/*
+	
 	Struct to keep track of timestamped data in order to evict with O(1)
-	*/
+	
 	uint64_t ptime;
 	TimeNode *next = nullptr;
 	vector<string> keys;
-};
+};*/
 
 
-class LRUCacheElement: public MemElement
-{
-public:
-	TimeNode *lastaccess = nullptr;
-	LRUCacheElement();	
-};
+// class LRUCacheElement: public MemcacheElement
+// {
+// public:
+// 	TimeNode *lastaccess = nullptr;
+// 	LRUCacheElement();	
+// };
 
 
 class LRUCache : public Memcache {
 public:
-	typedef LRUCacheElement MemcacheElement;
+	// typedef LRUCacheElement MemcacheElement;
 	LRUCache()
 	{
 		head = nullptr;
@@ -84,7 +84,7 @@ public:
 		Return:
 		:: returns 1 if evicted the needed memory else returns 0
 		*/
-
+		log_info << "shit got real2" <<endl;
 		size_t claimed = 0;
 		while(claimed<mem_need)
 		{

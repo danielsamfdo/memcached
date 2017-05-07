@@ -106,7 +106,7 @@ uint64_t Memcache::get_time()
 
 int Memcache::Evict(size_t mem_need)
 {
-    
+    log_info << "shit got real3" <<endl;
     return 0;
 }
 

@@ -18,7 +18,7 @@ enum OPERATIONS{set=1, add=2, replace=3, append=4, prepend=5, cas=6, get=7, vers
 
 class Memcache {
 
-public: typedef MemElement MemcacheElement;
+// public: typedef MemElement MemcacheElement;
 protected:
     
     unordered_map<string, MemcacheElement> cache;

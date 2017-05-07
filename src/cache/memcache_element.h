@@ -3,7 +3,17 @@
 
 #include <cstdint>
 
-class MemElement
+struct TimeNode
+{
+	/*
+	Struct to keep track of timestamped data in order to evict with O(1)
+	*/
+	uint64_t ptime;
+	TimeNode *next = nullptr;
+	vector<string> keys;
+};
+
+class MemcacheElement
  {
  public:
  	string block;
@@ -11,9 +21,10 @@ class MemElement
     uint64_t exptime;
     size_t bytes;
     uint64_t cas_unique;
- 	MemElement()
+    TimeNode *lastaccess;
+ 	MemcacheElement()
  	{
- 		
+ 		lastaccess = nullptr;
  	};
 };
 
