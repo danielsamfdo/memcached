@@ -6,7 +6,7 @@
 class MemcacheElement
  {
  public:
- 	shared_ptr<const char> block;
+ 	string block;
     uint16_t flags;
     time_t exptime;
     int bytes;

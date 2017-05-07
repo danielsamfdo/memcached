@@ -35,12 +35,12 @@ string Memcache::process_set(int socket, vector<string> tokens) {
 
     MemcacheElement element = store_fill(tokens);
     string block = read_len(socket, element.bytes);
-    element.block = shared_ptr<const char>(block.c_str());
+    element.block = (block.c_str());
 
     bool no_reply = tokens.back() == "noreply";
 
     cache[key] = element; //update stats!
-    log_info << "Stored for key " << key << "element" << endl;
+    log_info << "Stored for key " << key << element.block << endl;
     if(! no_reply) {
         output = "STORED";
     }
@@ -49,14 +49,13 @@ string Memcache::process_set(int socket, vector<string> tokens) {
 }
 
 string Memcache::process_add(int socket, vector<string> tokens) {
-
     string output = "";
     return output;
 }
 
 string response_get(string key, MemcacheElement elt){
-    return "test";
-    // return "VALUE " + key + " " + elt.flags + " " + elt.bytes + " " + elt.cas_unique + "\r\n"
+    string cas = "10";
+    return "VALUE " + key + " " + to_string(elt.flags) + " " + to_string(elt.bytes)  + "\r\n";
 }
 
 string Memcache::process_get(int socket, vector<string> keys) {
@@ -70,18 +69,28 @@ string Memcache::process_get(int socket, vector<string> keys) {
         }
         else{
             res = cache_iterator->second;
+            string response = response_get(keys[it], res);
             log_info << "Present in CACHE" << endl;
-            // output += response_get(keys[it],res);
+            output += response;
+            output += res.block;
+            output += "\r\n"; 
+            // string str((char *)res.block);
+            // output += str + "\r\n";
         }
     }
+    output += "END";
+    log_info << output << endl;
+
     return output;
 }
 
 MemcacheElement Memcache::store_fill(vector<string> tokens) {
     MemcacheElement element;
-
+    log_info << " FLAGS " << str_cast<uint16_t>(tokens[0]) << endl;
     element.flags = str_cast<uint16_t>(tokens[0]);
+    log_info << " EXP TIME " << str_cast<int>(tokens[1]) << endl;
     element.exptime = str_cast<int>(tokens[1]);
+    log_info << " BYTES " << str_cast<int>(tokens[2]) << endl;
     element.bytes = str_cast<int>(tokens[2]);
 
     return element;
