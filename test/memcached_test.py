@@ -47,17 +47,17 @@ class TestMemcache(unittest.TestCase):
         self.assertEqual(result, True)
         self.assertEqual(self.mc.get("long"), None)
 
-    # def test_get_multi(self):
-    #     self.check_setget("gm_a_string", "some random string")
-    #     self.check_setget("gm_an_integer", 42)
-    #     self.assertEqual(
-    #         self.mc.get_multi(["gm_a_string", "gm_an_integer"]),
-    #         {"gm_an_integer": 42, "gm_a_string": "some random string"})
+    def test_get_multi(self):
+        self.check_setget("gm_a_string", "some random string")
+        self.check_setget("gm_an_integer", 42)
+        self.assertEqual(
+            self.mc.get_multi(["gm_a_string", "gm_an_integer"]),
+            {"gm_an_integer": 42, "gm_a_string": "some random string"})
 
-    # def test_get_unknown_value(self):
-    #     self.mc.delete("unknown_value")
+    def test_get_unknown_value(self):
+        self.mc.delete("unknown_value")
 
-    #     self.assertEqual(self.mc.get("unknown_value"), None)
+        self.assertEqual(self.mc.get("unknown_value"), None)
 
     # def test_setget_foostruct(self):
     #     f = FooStruct()

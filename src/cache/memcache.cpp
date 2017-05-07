@@ -359,6 +359,7 @@ void Memcache::process_quit(){
 }
 
 void Memcache::process_flush_all(){
+
     cache.clear();
     return ;
 }
@@ -395,6 +396,8 @@ string Memcache::process_delete(int socket, vector<string> tokens){
 }
 
 string Memcache::process_incr(int socket, vector<string> keys){
+
+    // stoi( str );
     return "";
 }
 
