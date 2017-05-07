@@ -3,12 +3,18 @@
 
 #include <cstdint>
 
-struct MemcacheElement {
-    shared_ptr<const char> block;
+class MemcacheElement
+ {
+ public:
+ 	shared_ptr<const char> block;
     uint16_t flags;
-    unsigned long long int exptime;
+    time_t exptime;
     int bytes;
     uint64_t cas_unique;
+ 	MemcacheElement()
+ 	{
+ 		
+ 	};
 };
 
 #endif //MEMCACHED_CLONE_BRUTE_FORCE_MEMCACHE_ELEMENT_H
