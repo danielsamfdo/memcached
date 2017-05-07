@@ -9,7 +9,7 @@ class MemcacheElement
  	string block;
     uint16_t flags;
     time_t exptime;
-    int bytes;
+    size_t bytes;
     uint64_t cas_unique;
  	MemcacheElement()
  	{

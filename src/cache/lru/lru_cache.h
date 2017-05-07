@@ -22,8 +22,6 @@ public:
 
 class LRUCache : public Memcache {
 public:
-	TimeNode **head;
-	TimeNode **tail;
 
 	LRUCache()
 	{
@@ -31,12 +29,18 @@ public:
 		tail = nullptr;
 	}
 
-	void UpdateCache(string key,MemcacheElement* e, time_t)
+private:
+
+	TimeNode **head;
+	TimeNode **tail;
+
+	void UpdateCache(string key,LRUCacheElement* e, time_t)
 	{
 		//Delete the key in the past timestamp
 		TimeNode *t = e->lastaccess;
 		int ind = -1;
-		for(int i=0;i<(t->keys).size();i++)
+		int s = (t->keys).size();
+		for(int i=0;i<s;i++)
 		{
 			if (key == (t->keys)[i])
 			{
@@ -44,7 +48,7 @@ public:
 				break;
 			}
 		}
-		(t->keys).erase((t->keys).begin()+ind)
+		(t->keys).erase((t->keys).begin()+ind);
 
 		//Make new timestamp and update info there and the tail pointer
 		TimeNode *nt  = new TimeNode();
@@ -59,10 +63,35 @@ public:
 			(*tail)->next = nt;
 			tail = &nt;
 		}
-		pass
+		//pass
 	}
 
-	void Evict()
+	int Evict(size_t mem_need)
+	{
+		/*
+		Parameters:
+		:: mem_need :: Amount of memory needed to evict
+		Return:
+		:: returns 1 if evicted the needed memory else returns 0
+		*/
+		size_t claimed = 0;
+		while(claimed<mem_need)
+		{
+			if (*head == *tail) return 0;
+			TimeNode *pt = *head;
+			int s = (pt->keys).size()
+			for(int i=0;i<s;i++)
+			{
+				string key = pt->keys[i];
+				LRUCacheElement e = cache[key];
+				claimed += e.bytes;
+				cache.erase(key);
+				head = &(pt->next);
+			}
+		}
+		//assign the size var to (size-claimed)
+		return 1
+	}
 
 };
 
