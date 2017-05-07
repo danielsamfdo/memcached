@@ -20,7 +20,7 @@ private:
     unordered_map<string, MemcacheElement> cache;
     MemcacheElement store_fill(vector<string> tokens);
     unordered_map<string, int > operation;
-
+    static unsigned long long cas_uniq_counter;
 
 public:
     Memcache(){
@@ -31,8 +31,10 @@ public:
         operation.insert(pair<string,int>("append",OPERATIONS::append) );
         operation.insert(pair<string,int>("prepend",OPERATIONS::prepend) );
         operation.insert(pair<string,int>("cas",OPERATIONS::cas) );
+        // cas_uniq_counter = 0 ;
     }
     Statistics memcache_stats;
+    static unsigned long long get_cas_counter();
     string process_command(int socket, string command);
     // Storage commands
     string process_set(int socket, vector<string> tokens);
