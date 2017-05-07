@@ -3,3 +3,23 @@
 3) check formats and send error if not in specified format
 4) Add Test Cases
 
+
+1) When client fails midway
+2) The append and prepend commands do not accept flags or exptime.  They update existing data portions, and ignore new flag and exptime settings.
+3) <exptime> is expiration time. If it's 0, the item never expires
+  (although it may be deleted from the cache to make place for other
+  items). If it's non-zero (either Unix time or offset in seconds from
+  current time), it is guaranteed that clients will not be able to
+  retrieve this item after the expiration time arrives (measured by
+  server time). If a negative value is given the item is immediately
+  expired.
+4) Client says false messages when bytes to send is 30 but only sends 10
+5) Concurrent access
+6) Check for no reply parameter optional
+7) Handle Expiration Time.
+8) Handle Format Checks for each commands
+
+
+Low priority 
+Statistics
+
