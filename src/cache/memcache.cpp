@@ -22,6 +22,22 @@ string Memcache::process_command(int socket, string command) {
             log_info << "ADD METHOD " << endl;
             output = process_add(socket, tokens);
             break;
+        case OPERATIONS::append :
+            log_info << "APPEND METHOD " << endl;
+            output = process_add(socket, tokens);
+            break;
+        case OPERATIONS::prepend :
+            log_info << "PREPEND METHOD " << endl;
+            output = process_add(socket, tokens);
+            break;
+        case OPERATIONS::replace :
+            log_info << "REPLACE METHOD " << endl;
+            output = process_add(socket, tokens);
+            break;
+        case OPERATIONS::cas :
+            log_info << "CAS METHOD " << endl;
+            output = process_add(socket, tokens);
+            break;
     }
     return output;
 }
@@ -54,9 +70,25 @@ string Memcache::process_add(int socket, vector<string> tokens) {
 }
 
 string response_get(string key, MemcacheElement elt){
-    string cas = "10";
     return "VALUE " + key + " " + to_string(elt.flags) + " " + to_string(elt.bytes)  + "\r\n";
 }
+
+string Memcache::process_append(int socket, vector<string> keys) {
+    return "";
+}
+
+string Memcache::process_prepend(int socket, vector<string> keys) {
+    return "";
+}
+
+string Memcache::process_replace(int socket, vector<string> keys) {
+    return "";
+}
+
+string Memcache::process_cas(int socket, vector<string> keys) {
+    return "";
+}
+
 
 string Memcache::process_get(int socket, vector<string> keys) {
     string output = "";

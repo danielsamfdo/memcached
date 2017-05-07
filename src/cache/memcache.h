@@ -12,7 +12,7 @@
 
 #include "statistics.h"
 using namespace std;
-enum OPERATIONS{set=1,get,add};
+enum OPERATIONS{set=1, add, replace, append, prepend, cas, get};
 
 class Memcache {
 
@@ -26,16 +26,20 @@ public:
         operation.insert(pair<string,int>("set",OPERATIONS::set) );
         operation.insert(pair<string,int>("get",OPERATIONS::get) );
         operation.insert(pair<string,int>("add",OPERATIONS::add) );
+        operation.insert(pair<string,int>("replace",OPERATIONS::replace) );
+        operation.insert(pair<string,int>("append",OPERATIONS::append) );
+        operation.insert(pair<string,int>("prepend",OPERATIONS::append) );
+        operation.insert(pair<string,int>("cas",OPERATIONS::cas) );
     }
     Statistics memcache_stats;
     string process_command(int socket, string command);
     // Storage commands
     string process_set(int socket, vector<string> tokens);
-    // string process_replace(int socket, vector<string> tokens);
-    // string process_append(int socket, vector<string> tokens);
-    // string process_prepend(int socket, vector<string> tokens);
+    string process_replace(int socket, vector<string> tokens);
+    string process_append(int socket, vector<string> tokens);
+    string process_prepend(int socket, vector<string> tokens);
     string process_add(int socket, vector<string> tokens);
-    // string process_cas(int socket, vector<string> tokens);
+    string process_cas(int socket, vector<string> tokens);
 
     // Retrieval commands
     string process_get(int socket, vector<string> tokens);
