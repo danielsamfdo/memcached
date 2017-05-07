@@ -11,6 +11,7 @@ string Memcache::process_command(int socket, string command) {
     int command_type = this->operation[tokens[0]];
     log_info << command_type << endl;
     tokens.erase(tokens.begin()); //remove first token
+
     switch(command_type){
         case OPERATIONS::set :
             log_info << "SET METHOD" << endl;
@@ -73,6 +74,7 @@ string Memcache::process_command(int socket, string command) {
             output = "ERROR";
             break;
     }
+    
     return output;
 }
 
@@ -80,26 +82,38 @@ unsigned long long Memcache::get_cas_counter(){
     return cas_uniq_counter++;
 }
 
+void Memcache::lock(char key){
+    Mutexvariables[key].lock();
+    log_info << "Locking " << key << endl;
+    return ;
+}
+
+void Memcache::unlock(char key){
+    log_info << "Unlocking " << key << endl;
+    Mutexvariables[key].unlock();
+    return ;
+}
+
 string Memcache::process_set(int socket, vector<string> tokens) {
 
     /** Sample implementation **/
     string output;
     string key = tokens[0];
+    Memcache::lock(key[0]);
+    // log_info << "Locking " << key[0] << endl;
     tokens.erase(tokens.begin());
-
     MemcacheElement element = store_fill(tokens);
     string block = read_len(socket, element.bytes+2);
     block = block.substr(0,block.size()-2); 
     element.block = (block.c_str());
-
     bool no_reply = tokens.back() == "noreply";
-
     cache[key] = element; //update stats!
     log_info << "Stored for key " << key << element.block << endl;
     if(! no_reply) {
         output = "STORED";
     }
-
+    // log_info << "Unlocking " << key[0] << endl;
+    Memcache::unlock(key[0]);
     return output;
 }
 
@@ -111,6 +125,7 @@ string Memcache::process_add(int socket, vector<string> tokens) {
 
     cache_iterator = cache.find(key);
     if ( cache_iterator == cache.end() ){
+
         log_info << key <<" is the key we try to add " << endl;
         MemcacheElement element = store_fill(tokens);
         string block = read_len(socket, element.bytes+2);
@@ -281,22 +296,26 @@ string Memcache::process_cas(int socket, vector<string> tokens) {
 string Memcache::process_get(int socket, vector<string> keys) {
     string output = "";
     unordered_map<string, MemcacheElement>::iterator cache_iterator;
-    MemcacheElement res;
+    MemcacheElement* res;
     for(int it=0;it<keys.size();it++){
-        cache_iterator = cache.find(keys[it]);
+        string key = keys[it];
+        Memcache::lock(key[0]);
+        cache_iterator = cache.find(key);
         if ( cache_iterator == cache.end() ){
 
         }
         else{
-            res = cache_iterator->second;
-            string response = response_get(keys[it], res);
+            res = &cache_iterator->second;
+            
+            string response = response_get(keys[it], *res);
             log_info << "Present in CACHE" << endl;
             output += response;
-            output += res.block;
+            output += res->block;
             output += "\r\n"; 
             // string str((char *)res.block);
             // output += str + "\r\n";
         }
+        Memcache::unlock(key[0]);
     }
     output += "END";
     log_info << output << endl;

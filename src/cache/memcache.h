@@ -9,6 +9,7 @@
 #include <unordered_map>
 #include <common/log_util.h>
 #include <common/io_util.h>
+#include <mutex>
 
 #include "statistics.h"
 using namespace std;
@@ -21,6 +22,7 @@ protected:
     MemcacheElement store_fill(vector<string> tokens);
     unordered_map<string, int > operation;
     static unsigned long long cas_uniq_counter;
+    std::mutex Mutexvariables[256]; 
 
 public:
     Memcache(){
@@ -58,11 +60,15 @@ public:
     string process_incr(int socket, vector<string> tokens);
     string process_decr(int socket, vector<string> tokens);
 
-
     // Misc Commands
     string process_version();
     void process_flush_all();
     void process_quit();
+
+    // Other Locking
+    void lock(char key);
+    void unlock(char key);
+
 };
 
 #include "memcache.cpp"
