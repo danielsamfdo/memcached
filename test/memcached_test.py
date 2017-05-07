@@ -41,11 +41,11 @@ class TestMemcache(unittest.TestCase):
         self.check_setget("an_integer", 42)
         self.check_setget("an_integer_2", 42, noreply=True)
 
-    # def test_delete(self):
-    #     self.check_setget("long", int(1 << 30))
-    #     result = self.mc.delete("long")
-    #     self.assertEqual(result, True)
-    #     self.assertEqual(self.mc.get("long"), None)
+    def test_delete(self):
+        self.check_setget("long", int(1 << 30))
+        result = self.mc.delete("long")
+        self.assertEqual(result, True)
+        self.assertEqual(self.mc.get("long"), None)
 
     # def test_get_multi(self):
     #     self.check_setget("gm_a_string", "some random string")

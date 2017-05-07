@@ -80,7 +80,7 @@ string Memcache::process_command(int socket, string command) {
             break;
         case OPERATIONS::del :
             log_info << "DELETE METHOD " << endl;
-            output = process_decr(socket, tokens);
+            output = process_delete(socket, tokens);
             break;
         default:
             log_info << "NO OTHER METHOD " << endl;
@@ -133,6 +133,7 @@ string Memcache::process_set(int socket, vector<string> tokens) {
     if(! no_reply) {
         output = "STORED";
     }
+
     // log_info << "Unlocking " << key[0] << endl;
     Memcache::unlock(key[0]);
     return output;
@@ -367,22 +368,29 @@ string Memcache::process_delete(int socket, vector<string> tokens){
     unordered_map<string, MemcacheElement>::iterator cache_iterator;
     MemcacheElement res;
     string key = tokens[0];
-
-    cache_iterator = cache.find(key);
-    if ( cache_iterator == cache.end() ){
-        output = "NOT_FOUND";
+    Memcache::lock(key[0]);
+    try {
+        cache_iterator = cache.find(key);
+        if ( cache_iterator == cache.end() ){
+            output = "NOT_FOUND";
+        }
+        else{
+            res = cache_iterator->second;
+            log_info << "Present in CACHE" << endl;
+            cache.erase(key); 
+            output = "DELETED";
+        }
+        log_info << output << endl;
+        bool no_reply = tokens.back() == "noreply";
+        if(no_reply){
+            output = "";
+        }
     }
-    else{
-        res = cache_iterator->second;
-        log_info << "Present in CACHE" << endl;
-        cache.erase(key); 
-        output = "DELETED";
+    catch (exception& e)
+    {
+        log_error << e.what() << endl;
     }
-    log_info << output << endl;
-    bool no_reply = tokens.back() == "noreply";
-    if(no_reply){
-        output = "";
-    }
+    Memcache::unlock(key[0]);
     return output;
 }
 
