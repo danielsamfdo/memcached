@@ -135,7 +135,7 @@ string Memcache::process_add(int socket, vector<string> tokens) {
 }
 
 string response_get(string key, MemcacheElement elt){
-    return "VALUE " + key + " " + to_string(elt.flags) + " " + to_string(elt.bytes)  +  " " + to_string(elt.cas_unique) + "\r\n";
+    return "VALUE " + key + " " + to_string(elt.flags) + " " + to_string(elt.bytes) + "\r\n";
 }
 
 void update_store_fill(MemcacheElement *element,vector<string> tokens){

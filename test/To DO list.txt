@@ -1,0 +1,5 @@
+1) Check Python Client - DONE
+2) Add all commands
+3) check formats and send error if not in specified format
+4) Add Test Cases
+
