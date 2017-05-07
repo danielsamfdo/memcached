@@ -1,6 +1,6 @@
 #ifndef MEMCACHED_CLONE_BRUTE_FORCE_MEMCACHE_H
 #define MEMCACHED_CLONE_BRUTE_FORCE_MEMCACHE_H
-
+#include <typeinfo>
 #include <iostream>
 #include <cstdlib>
 #include <sys/socket.h>
@@ -18,7 +18,8 @@ enum OPERATIONS{set=1, add=2, replace=3, append=4, prepend=5, cas=6, get=7, vers
 
 class Memcache {
 
-// public: typedef MemElement MemcacheElement;
+public: 
+    // typedef MemElement MemcacheElement;
 protected:
     
     unordered_map<string, MemcacheElement> cache;
@@ -57,8 +58,8 @@ public:
 
     int get_memory(size_t mem_need);
     uint64_t get_time();
-    int Evict(size_t mem_need);
-    void UpdateCache(string key,MemcacheElement *e, uint64_t pt);
+    virtual int Evict(size_t mem_need);
+    virtual void UpdateCache(string key,MemcacheElement *e, uint64_t pt);
 
     string response_get(string key, MemcacheElement elt);
     void update_store_fill(MemcacheElement *element,vector<string> tokens);

@@ -30,7 +30,7 @@ public:
 	{
 		head = nullptr;
 		tail = nullptr;
-		log_info << "shit got real"<<endl;
+		log_info << " LRU CONSTRUCTOR "<<endl;
 	}
 
 // private:
@@ -38,10 +38,10 @@ public:
 	TimeNode **head;
 	TimeNode **tail;
 
-	void UpdateCache(string key,MemcacheElement *e, uint64_t pt)// override
+	void UpdateCache(string key, MemcacheElement *e, uint64_t pt)// override
 	{
 		//Delete the key in the past timestamp
-		log_info << "shit got real" <<endl;
+		log_info << "shit got real  &&&&&&&&&&&&&&&&&&&&&&" <<endl;
 		TimeNode *t = e->lastaccess;
 		if (t!=nullptr)
 		{
@@ -73,7 +73,6 @@ public:
 			(*tail)->next = nt;
 			tail = &nt;
 		}
-		//pass
 	}
 
 	int Evict(size_t mem_need)
@@ -84,7 +83,7 @@ public:
 		Return:
 		:: returns 1 if evicted the needed memory else returns 0
 		*/
-		log_info << "shit got real2" <<endl;
+		log_info << "shit got real2 &&&&&&&&&&&&&&&&&&&&&&&" <<endl;
 		size_t claimed = 0;
 		while(claimed<mem_need)
 		{

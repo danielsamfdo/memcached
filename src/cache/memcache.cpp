@@ -1,3 +1,4 @@
+
 unsigned long long Memcache::cas_uniq_counter = 0;
 
 string Memcache::process_command(int socket, string command) {
@@ -142,6 +143,7 @@ string Memcache::process_set(int socket, vector<string> tokens) {
             output = "STORED";
         }
         memcache_stats.allocated += mem_need;
+        std::cout << typeid(element).name() << "\n*******************";
         UpdateCache(key,&element, get_time());
     }
 
