@@ -1,5 +1,18 @@
 unsigned long long Memcache::cas_uniq_counter = 0;
 
+void update_store_fill(MemcacheElement *element,vector<string> tokens, bool just_bytes=false){
+    log_info << " FLAGS " << str_cast<uint16_t>(tokens[0]) << endl;
+    element->flags = str_cast<uint16_t>(tokens[0]);
+    log_info << " EXP TIME " << str_cast<int>(tokens[1]) << endl;
+    element->exptime = str_cast<int>(tokens[1]);
+    if(!just_bytes)
+        element->bytes += str_cast<int>(tokens[2]);
+    else
+        element->bytes = str_cast<int>(tokens[2]);
+    log_info << " BYTES " << element->bytes << endl;
+    element->cas_unique = Memcache::get_cas_counter();
+}
+
 string Memcache::process_command(int socket, string command) {
     log_info << "Processing command " << command.c_str() << endl;
     log_info << "Hi" << endl;
@@ -98,11 +111,19 @@ string Memcache::process_set(int socket, vector<string> tokens) {
 
     /** Sample implementation **/
     string output;
+    unordered_map<string, MemcacheElement>::iterator cache_iterator;
     string key = tokens[0];
     Memcache::lock(key[0]);
+    cache_iterator = cache.find(key);
     // log_info << "Locking " << key[0] << endl;
     tokens.erase(tokens.begin());
-    MemcacheElement element = store_fill(tokens);
+    MemcacheElement element;
+    if ( cache_iterator == cache.end() ){
+        element = store_fill(tokens);
+    } else {
+        element = cache_iterator->second;
+        update_store_fill(&element, tokens, true);
+    }
     string block = read_len(socket, element.bytes+2);
     block = block.substr(0,block.size()-2); 
     element.block = (block.c_str());
@@ -153,15 +174,7 @@ string response_get(string key, MemcacheElement elt){
     return "VALUE " + key + " " + to_string(elt.flags) + " " + to_string(elt.bytes) + "\r\n";
 }
 
-void update_store_fill(MemcacheElement *element,vector<string> tokens){
-    log_info << " FLAGS " << str_cast<uint16_t>(tokens[0]) << endl;
-    element->flags = str_cast<uint16_t>(tokens[0]);
-    log_info << " EXP TIME " << str_cast<int>(tokens[1]) << endl;
-    element->exptime = str_cast<int>(tokens[1]);
-    element->bytes += str_cast<int>(tokens[2]);
-    log_info << " BYTES " << element->bytes << endl;
-    element->cas_unique = Memcache::get_cas_counter();
-}
+
 
 string Memcache::process_append(int socket, vector<string> tokens) {
     string output = "";
