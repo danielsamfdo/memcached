@@ -340,3 +340,7 @@ string Memcache::process_incr(int socket, vector<string> keys){
 string Memcache::process_decr(int socket, vector<string> keys){
     return "";
 }
+
+string Memcache::process_gets(int socket, vector<string> keys){
+    return "";
+}
