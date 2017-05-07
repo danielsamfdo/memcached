@@ -59,10 +59,10 @@ class TestMemcache(unittest.TestCase):
 
         self.assertEqual(self.mc.get("unknown_value"), None)
 
-    # def test_setget_foostruct(self):
-    #     f = FooStruct()
-    #     self.check_setget("foostruct", f)
-    #     self.check_setget("foostruct_2", f, noreply=True)
+    def test_setget_foostruct(self):
+        f = FooStruct()
+        self.check_setget("foostruct", f)
+        self.check_setget("foostruct_2", f, noreply=True)
 
     # def test_incr(self):
     #     self.check_setget("i_an_integer", 42)
