@@ -326,11 +326,32 @@ void Memcache::process_quit(){
 }
 
 void Memcache::process_flush_all(){
+    cache.clear();
     return ;
 }
 
-string Memcache::process_delete(int socket, vector<string> keys){
-    return "";
+string Memcache::process_delete(int socket, vector<string> tokens){
+    string output = "";
+    unordered_map<string, MemcacheElement>::iterator cache_iterator;
+    MemcacheElement res;
+    string key = tokens[0];
+
+    cache_iterator = cache.find(key);
+    if ( cache_iterator == cache.end() ){
+        output = "NOT_FOUND";
+    }
+    else{
+        res = cache_iterator->second;
+        log_info << "Present in CACHE" << endl;
+        cache.erase(key); 
+        output = "DELETED";
+    }
+    log_info << output << endl;
+    bool no_reply = tokens.back() == "noreply";
+    if(no_reply){
+        output = "";
+    }
+    return output;
 }
 
 string Memcache::process_incr(int socket, vector<string> keys){
