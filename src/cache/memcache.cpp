@@ -127,6 +127,7 @@ string Memcache::process_set(int socket, vector<string> tokens) {
     string block = read_len(socket, element.bytes+2);
     block = block.substr(0,block.size()-2); 
     element.block = (block.c_str());
+    if (element.lastaccess == nullptr )log_info << "LRU element" <<endl;
 
     bool no_reply = tokens.back() == "noreply";
 

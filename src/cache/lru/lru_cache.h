@@ -38,7 +38,7 @@ public:
 	TimeNode **head;
 	TimeNode **tail;
 
-	void UpdateCache(string key,MemcacheElement *e, uint64_t pt)
+	void UpdateCache(string key,MemcacheElement *e, uint64_t pt)// override
 	{
 		//Delete the key in the past timestamp
 		log_info << "shit got real" <<endl;
