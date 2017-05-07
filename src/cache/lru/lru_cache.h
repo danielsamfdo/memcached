@@ -6,6 +6,9 @@
 
 struct TimeNode
 {
+	/*
+	Struct to keep track of timestamped data in order to evict with O(1)
+	*/
 	time_t *ptime;
 	TimeNode *next = nullptr;
 	vector<string> keys;
@@ -79,18 +82,18 @@ private:
 		{
 			if (*head == *tail) return 0;
 			TimeNode *pt = *head;
-			int s = (pt->keys).size()
+			int s = (pt->keys).size();
 			for(int i=0;i<s;i++)
 			{
 				string key = pt->keys[i];
-				LRUCacheElement e = cache[key];
-				claimed += e.bytes;
+				//LRUCacheElement e = ;
+				claimed += cache[key].bytes;
 				cache.erase(key);
 				head = &(pt->next);
 			}
 		}
 		//assign the size var to (size-claimed)
-		return 1
+		return 1;
 	}
 
 };

@@ -16,7 +16,7 @@ enum OPERATIONS{set=1, add=2, replace=3, append=4, prepend=5, cas=6, get=7, vers
 
 class Memcache {
 
-private:
+protected:
     unordered_map<string, MemcacheElement> cache;
     MemcacheElement store_fill(vector<string> tokens);
     unordered_map<string, int > operation;

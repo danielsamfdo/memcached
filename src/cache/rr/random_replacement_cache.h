@@ -7,7 +7,7 @@ class RandomReplacementCache : public Memcache {
 
 public:
 
-	RandomReplacementCache();
+	//RandomReplacementCache();
 
 private:
 
@@ -33,7 +33,7 @@ private:
 			}
 		}
 		//assign the size var to (size-claimed)
-		return 1
+		return 1;
 	}
 
 };
