@@ -3,15 +3,15 @@
 
 #include <cstdint>
 
-class MemcacheElement
+class MemElement
  {
  public:
  	string block;
     uint16_t flags;
-    time_t exptime;
+    uint64_t exptime;
     size_t bytes;
     uint64_t cas_unique;
- 	MemcacheElement()
+ 	MemElement()
  	{
  		
  	};

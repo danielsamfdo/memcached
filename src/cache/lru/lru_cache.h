@@ -9,13 +9,13 @@ struct TimeNode
 	/*
 	Struct to keep track of timestamped data in order to evict with O(1)
 	*/
-	time_t *ptime;
+	uint64_t ptime;
 	TimeNode *next = nullptr;
 	vector<string> keys;
 };
 
 
-class LRUCacheElement: public MemcacheElement
+class LRUCacheElement: public MemElement
 {
 public:
 	TimeNode *lastaccess = nullptr;
@@ -25,11 +25,12 @@ public:
 
 class LRUCache : public Memcache {
 public:
-
+	typedef LRUCacheElement MemcacheElement;
 	LRUCache()
 	{
 		head = nullptr;
 		tail = nullptr;
+		
 	}
 
 private:
@@ -37,25 +38,30 @@ private:
 	TimeNode **head;
 	TimeNode **tail;
 
-	void UpdateCache(string key,LRUCacheElement* e, time_t)
+	void UpdateCache(string key,MemcacheElement* e, uint64_t pt)
 	{
 		//Delete the key in the past timestamp
 		TimeNode *t = e->lastaccess;
-		int ind = -1;
-		int s = (t->keys).size();
-		for(int i=0;i<s;i++)
+		if (t!=nullptr)
 		{
-			if (key == (t->keys)[i])
+			int ind = -1;
+			int s = (t->keys).size();
+			for(int i=0;i<s;i++)
 			{
-				ind = i;
-				break;
+				if (key == (t->keys)[i])
+				{
+					ind = i;
+					break;
+				}
 			}
+			(t->keys).erase((t->keys).begin()+ind);
 		}
-		(t->keys).erase((t->keys).begin()+ind);
 
 		//Make new timestamp and update info there and the tail pointer
 		TimeNode *nt  = new TimeNode();
+		nt->ptime = get_time();
 		nt->keys.push_back(key);
+		e->lastaccess = nt;
 		if (head==nullptr)
 		{
 			head = &nt;
@@ -80,7 +86,11 @@ private:
 		size_t claimed = 0;
 		while(claimed<mem_need)
 		{
-			if (*head == *tail) return 0;
+			if (*head == *tail)
+			{
+				memcache_stats.allocated -= claimed;
+				return 0;
+			}
 			TimeNode *pt = *head;
 			int s = (pt->keys).size();
 			for(int i=0;i<s;i++)
@@ -92,6 +102,7 @@ private:
 				head = &(pt->next);
 			}
 		}
+		memcache_stats.allocated -= claimed;
 		//assign the size var to (size-claimed)
 		return 1;
 	}

@@ -80,24 +80,53 @@ unsigned long long Memcache::get_cas_counter(){
     return cas_uniq_counter++;
 }
 
+int Memcache::get_memory(size_t mem_need)
+{
+    if (capacity-memcache_stats.allocated>=mem_need)
+    {
+        return 1;
+    }
+    //Take care of expired items if time permits
+    else
+    {
+        return 0;//Evict(mem_need);
+    }
+}
+
+uint64_t Memcache::get_time()
+{
+    /*
+    Returns current timestamp in seconds
+    */
+    return uint64_t((Time_obj::now()-time_start).count());
+}
+
 string Memcache::process_set(int socket, vector<string> tokens) {
 
     /** Sample implementation **/
     string output;
     string key = tokens[0];
     tokens.erase(tokens.begin());
-
-    MemcacheElement element = store_fill(tokens);
+    // if(toke)
+    MemcacheElement element;
+    store_fill(tokens,&element);
     string block = read_len(socket, element.bytes+2);
     block = block.substr(0,block.size()-2); 
     element.block = (block.c_str());
 
     bool no_reply = tokens.back() == "noreply";
 
-    cache[key] = element; //update stats!
-    log_info << "Stored for key " << key << element.block << endl;
-    if(! no_reply) {
-        output = "STORED";
+    // Get the memory cleared if cache is full
+    size_t mem_need = element.bytes;
+    if (get_memory(mem_need))
+    {
+        cache[key] = element; //update stats!
+        log_info << "Stored for key " << key << element.block << endl;
+        if(! no_reply) {
+            output = "STORED";
+        }
+        memcache_stats.allocated += mem_need;
+        //UpdateCache(key,&element, get_time());
     }
 
     return output;
@@ -112,7 +141,8 @@ string Memcache::process_add(int socket, vector<string> tokens) {
     cache_iterator = cache.find(key);
     if ( cache_iterator == cache.end() ){
         log_info << key <<" is the key we try to add " << endl;
-        MemcacheElement element = store_fill(tokens);
+        MemcacheElement element;
+        store_fill(tokens,&element);
         string block = read_len(socket, element.bytes+2);
         block = block.substr(0,block.size()-2); 
         element.block = (block.c_str());
@@ -134,16 +164,16 @@ string Memcache::process_add(int socket, vector<string> tokens) {
     return output;
 }
 
-string response_get(string key, MemcacheElement elt){
+string Memcache::response_get(string key, MemcacheElement elt){
     return "VALUE " + key + " " + to_string(elt.flags) + " " + to_string(elt.bytes) + "\r\n";
 }
 
-void update_store_fill(MemcacheElement *element,vector<string> tokens){
+void Memcache::update_store_fill(MemcacheElement *element,vector<string> tokens){
     log_info << " FLAGS " << str_cast<uint16_t>(tokens[0]) << endl;
     element->flags = str_cast<uint16_t>(tokens[0]);
     log_info << " EXP TIME " << str_cast<int>(tokens[1]) << endl;
-    element->exptime = str_cast<int>(tokens[1]);
-    element->bytes += str_cast<int>(tokens[2]);
+    element->exptime = str_cast<uint64_t>(tokens[1]);
+    element->bytes += str_cast<size_t>(tokens[2]);
     log_info << " BYTES " << element->bytes << endl;
     element->cas_unique = Memcache::get_cas_counter();
 }
@@ -219,7 +249,8 @@ string Memcache::process_replace(int socket, vector<string> tokens) {
     }
     else{
         log_info <<key<<" is the key we try to replace" << endl;
-        MemcacheElement element = store_fill(tokens);
+        MemcacheElement element;
+        store_fill(tokens,&element);
         string block = read_len(socket, element.bytes+2);
         block = block.substr(0,block.size()-2); 
         element.block = (block.c_str());
@@ -250,7 +281,8 @@ string Memcache::process_cas(int socket, vector<string> tokens) {
     }
     else{
         log_info <<key<<" is the key we try to CAS" << endl;
-        MemcacheElement element = store_fill(tokens);
+        MemcacheElement element;
+        store_fill(tokens,&element);
         string block = read_len(socket, element.bytes+2);
         block = block.substr(0,block.size()-2); 
         element.block = (block.c_str());
@@ -304,16 +336,16 @@ string Memcache::process_get(int socket, vector<string> keys) {
     return output;
 }
 
-MemcacheElement Memcache::store_fill(vector<string> tokens) {
-    MemcacheElement element;
+void Memcache::store_fill(vector<string> tokens, MemcacheElement *element) {
+    // MemcacheElement element;
     log_info << " FLAGS " << str_cast<uint16_t>(tokens[0]) << endl;
-    element.flags = str_cast<uint16_t>(tokens[0]);
+    element->flags = str_cast<uint16_t>(tokens[0]);
     log_info << " EXP TIME " << str_cast<int>(tokens[1]) << endl;
-    element.exptime = str_cast<int>(tokens[1]);
-    log_info << " BYTES " << str_cast<int>(tokens[2]) << endl;
-    element.bytes = str_cast<int>(tokens[2]);
-    element.cas_unique = Memcache::get_cas_counter();
-    return element;
+    element->exptime = str_cast<uint64_t>(tokens[1]);
+    log_info << " BYTES " << str_cast<size_t>(tokens[2]) << endl;
+    element->bytes = str_cast<int>(tokens[2]);
+    element->cas_unique = Memcache::get_cas_counter();
+    // return element;
 }
 
 string Memcache::process_version(){
