@@ -313,12 +313,20 @@ string Memcache::response_get(string key, MemcacheElement elt, bool gets){
 
 string Memcache::process_append(int socket, vector<string> tokens) {
     string output = "";
+    string response = valid_format_storage_commands(tokens);
+    if(response != "OK"){
+        log_info << response;
+        return response;
+    }
     unordered_map<string, MemcacheElement>::iterator cache_iterator;
     string key = tokens[0];
+    Memcache::lock(key[0]);
+
     tokens.erase(tokens.begin());
 
     cache_iterator = cache.find(key);
     if ( cache_iterator == cache.end() ){
+        output = "CLIENT_ERROR Key not present Cant be appended";
         // NO ACTION SHOULD BE DONE
     }
     else{
@@ -335,15 +343,21 @@ string Memcache::process_append(int socket, vector<string> tokens) {
         cache[key] = element; //update stats!
         log_info << "Stored for key " << key << element.block << endl;
         
-        return output;
     }
+    Memcache::unlock(key[0]);
     return output;
 }
 
 string Memcache::process_prepend(int socket, vector<string> tokens) {
     string output = "";
+    string response = valid_format_storage_commands(tokens);
+    if(response != "OK"){
+        log_info << response;
+        return response;
+    }
     unordered_map<string, MemcacheElement>::iterator cache_iterator;
     string key = tokens[0];
+    Memcache::lock(key[0]);
     tokens.erase(tokens.begin());
 
     cache_iterator = cache.find(key);
@@ -365,15 +379,21 @@ string Memcache::process_prepend(int socket, vector<string> tokens) {
         if(! no_reply) {
             output = "STORED";
         }
-        return output;
     }
+    Memcache::unlock(key[0]);
     return output;
 }
 
 string Memcache::process_replace(int socket, vector<string> tokens) {
     string output = "";
+    string response = valid_format_storage_commands(tokens);
+    if(response != "OK"){
+        log_info << response;
+        return response;
+    }
     unordered_map<string, MemcacheElement>::iterator cache_iterator;
     string key = tokens[0];
+    Memcache::lock(key[0]);
     tokens.erase(tokens.begin());
 
     cache_iterator = cache.find(key);
@@ -395,16 +415,21 @@ string Memcache::process_replace(int socket, vector<string> tokens) {
         if(! no_reply) {
             output = "STORED";
         }
-        return output;
     }
-
+    Memcache::unlock(key[0]);
     return output;
 }
 
 string Memcache::process_cas(int socket, vector<string> tokens) {
     string output = "";
+    string response = valid_format_storage_commands(tokens, true);
+    if(response != "OK"){
+        log_info << response;
+        return response;
+    }
     unordered_map<string, MemcacheElement>::iterator cache_iterator;
     string key = tokens[0];
+    Memcache::lock(key[0]);
     tokens.erase(tokens.begin());
 
     cache_iterator = cache.find(key);
@@ -436,9 +461,8 @@ string Memcache::process_cas(int socket, vector<string> tokens) {
             output = "";
         }
         
-        return output;
     }
-
+    Memcache::unlock(key[0]);
     return output;
 }
 
@@ -474,15 +498,7 @@ string Memcache::process_get(int socket, vector<string> keys, bool gets) {
 }
 
 void Memcache::store_fill(vector<string> tokens, MemcacheElement *element) {
-    // MemcacheElement element;
-    log_info << " FLAGS " << str_cast<uint16_t>(tokens[0]) << endl;
-    element->flags = str_cast<uint16_t>(tokens[0]);
-    log_info << " EXP TIME " << str_cast<int>(tokens[1]) << endl;
-    element->exptime = str_cast<uint64_t>(tokens[1]);
-    log_info << " BYTES " << str_cast<size_t>(tokens[2]) << endl;
-    element->bytes = str_cast<int>(tokens[2]);
-    element->cas_unique = Memcache::get_cas_counter();
-    // return element;
+
 }
 
 string Memcache::process_version(){
