@@ -430,8 +430,8 @@ string Memcache::process_incr(int socket, vector<string> tokens){
         else{
             res = cache_iterator->second;
             log_info << "Present in CACHE" << endl;
-            if(!is_number(res.block))
-                output = "CLIENT_ERROR Cache value is not a number";
+            if(!is_number(res.block) || !is_number(tokens[1]))
+                output = "CLIENT_ERROR Cache value or incr val tokens by client is not a number";
             else{
                 res.block = to_string(str_cast<uint64_t>(res.block) + str_cast<uint64_t>(tokens[1]));
                 output = res.block;
@@ -449,12 +449,42 @@ string Memcache::process_incr(int socket, vector<string> tokens){
     }
     Memcache::unlock(key[0]);
     return output;
-    // stoi( str );
-    return "";
 }
 
-string Memcache::process_decr(int socket, vector<string> keys){
-    return "";
+string Memcache::process_decr(int socket, vector<string> tokens){
+    string output = "";
+    unordered_map<string, MemcacheElement>::iterator cache_iterator;
+    MemcacheElement res;
+    string key = tokens[0];
+    Memcache::lock(key[0]);
+    try {
+        cache_iterator = cache.find(key);
+        if ( cache_iterator == cache.end() ){
+            output = "NOT_FOUND";
+        }
+        else{
+            res = cache_iterator->second;
+            log_info << "Present in CACHE" << str_cast<uint64_t>(res.block) << endl;
+            if(!is_number(res.block) || !is_number(tokens[1]))
+                output = "CLIENT_ERROR Cache value or decr val tokens by client is not a number";
+            else{
+                str_cast<uint64_t>(res.block);
+                res.block = to_string( + str_cast<uint64_t>(tokens[1]));
+                output = res.block;
+            }
+        }
+        log_info << output << endl;
+        bool no_reply = tokens.back() == "noreply";
+        if(no_reply){
+            output = "";
+        }
+    }
+    catch (exception& e)
+    {
+        log_error << e.what() << endl;
+    }
+    Memcache::unlock(key[0]);
+    return output;
 }
 
 string Memcache::process_gets(int socket, vector<string> keys){
