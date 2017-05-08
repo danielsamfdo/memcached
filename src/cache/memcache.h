@@ -66,7 +66,7 @@ public:
     // Misc Commands
     string process_version();
     void process_flush_all();
-    void process_quit();
+    void process_quit(int socket);
 
     // Other Locking
     void lock(char key);
