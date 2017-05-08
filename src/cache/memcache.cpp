@@ -61,7 +61,7 @@ string Memcache::process_command(int socket, string command) {
             break;
         case OPERATIONS::quit :
             log_info << "QUIT METHOD " << endl;
-            process_quit();
+            process_quit(socket);
             break;
         case OPERATIONS::flush_all :
             log_info << "FLUSH ALL METHOD " << endl;
@@ -432,7 +432,11 @@ string Memcache::process_version(){
     return "1.5.8";
 }
 
-void Memcache::process_quit(){
+void Memcache::process_quit(int socket){
+    shutdown(socket, SHUT_RDWR);
+    close(socket);
+    //terminate();
+    //exit(0);
     return ;
     // return "1.5.8";
 }
@@ -489,11 +493,13 @@ string Memcache::process_incr(int socket, vector<string> tokens){
         else{
             res = cache_iterator->second;
             log_info << "Present in CACHE" << endl;
-            if(!is_number(res.block))
-                output = "CLIENT_ERROR Cache value is not a number";
+            if(!is_number(res.block) || !is_number(tokens[1]))
+                output = "CLIENT_ERROR Cache value or incr val tokens by client is not a number";
             else{
                 res.block = to_string(str_cast<uint64_t>(res.block) + str_cast<uint64_t>(tokens[1]));
                 output = res.block;
+                res.bytes = res.block.size();
+                cache[key] = res;
             }
         }
         log_info << output << endl;
@@ -508,12 +514,48 @@ string Memcache::process_incr(int socket, vector<string> tokens){
     }
     Memcache::unlock(key[0]);
     return output;
-    // stoi( str );
-    return "";
 }
 
-string Memcache::process_decr(int socket, vector<string> keys){
-    return "";
+string Memcache::process_decr(int socket, vector<string> tokens){
+    string output = "";
+    unordered_map<string, MemcacheElement>::iterator cache_iterator;
+    MemcacheElement res;
+    string key = tokens[0];
+    Memcache::lock(key[0]);
+    try {
+        cache_iterator = cache.find(key);
+        if ( cache_iterator == cache.end() ){
+            output = "NOT_FOUND";
+        }
+        else{
+            res = cache_iterator->second;
+            log_info << "Present in CACHE" << str_cast<uint64_t>(res.block) << endl;
+            if(!is_number(res.block) || !is_number(tokens[1]))
+                output = "CLIENT_ERROR Cache value or decr val tokens by client is not a number";
+            else{
+                uint64_t v1 = str_cast<uint64_t>(res.block);
+                uint64_t v2 = str_cast<uint64_t>(tokens[1]);
+                if(v1 < v2)
+                    res.block = to_string(0);
+                else
+                    res.block = to_string(v1-v2);
+                output = res.block;
+                res.bytes = res.block.size();
+                cache[key] = res;
+            }
+        }
+        log_info << output << endl;
+        bool no_reply = tokens.back() == "noreply";
+        if(no_reply){
+            output = "";
+        }
+    }
+    catch (exception& e)
+    {
+        log_error << e.what() << endl;
+    }
+    Memcache::unlock(key[0]);
+    return output;
 }
 
 string Memcache::process_gets(int socket, vector<string> keys){
