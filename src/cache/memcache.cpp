@@ -95,6 +95,20 @@ unsigned long long Memcache::get_cas_counter(){
     return cas_uniq_counter++;
 }
 
+void Memcache::lockAll(){
+    for(int i=0;i<NLOCKS;i++)
+        Mutexvariables[i].lock();
+    log_info << "Locking All Keys" << endl;
+    return ;
+}
+
+void Memcache::unlockAll(){
+    log_info << "Unlocking ALL KEYS" << endl;
+    for(int i=0;i<NLOCKS;i++)
+        Mutexvariables[i].unlock();
+    return ;
+}
+
 void Memcache::lock(char key){
     Mutexvariables[key].lock();
     log_info << "Locking " << key << endl;
@@ -166,7 +180,6 @@ string Memcache::process_add(int socket, vector<string> tokens) {
     }
     else{
         // NO ACTION SHOULD BE DONE
-        output = "NOT_STORED";
     }
 
     return output;
@@ -249,7 +262,6 @@ string Memcache::process_replace(int socket, vector<string> tokens) {
     cache_iterator = cache.find(key);
     if ( cache_iterator == cache.end() ){
         // NO ACTION SHOULD BE DONE
-        output = "NOT_STORED";
     }
     else{
         log_info <<key<<" is the key we try to replace" << endl;
@@ -363,7 +375,9 @@ void Memcache::process_quit(){
 }
 
 void Memcache::process_flush_all(){
+    Memcache::lockAll();
     cache.clear();
+    Memcache::unlockAll();
     return ;
 }
 
@@ -407,16 +421,16 @@ string Memcache::process_incr(int socket, vector<string> tokens){
     try {
         cache_iterator = cache.find(key);
         if ( cache_iterator == cache.end() ){
-            output = "CLIENT_ERROR";
+            output = "NOT_FOUND";
         }
         else{
             res = cache_iterator->second;
             log_info << "Present in CACHE" << endl;
             if(!is_number(res.block))
-                output = "CLIENT_ERROR ";
+                output = "CLIENT_ERROR Cache value is not a number";
             else{
-
-                output = "";
+                res.block = to_string(str_cast<uint64_t>(res.block) + str_cast<uint64_t>(tokens[1]));
+                output = res.block;
             }
         }
         log_info << output << endl;
