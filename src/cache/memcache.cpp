@@ -268,7 +268,8 @@ string Memcache::process_set(int socket, vector<string> tokens) {
         }
         //locking back the key again before saving
         Memcache::lock(key[0]);
-        memcache_stats.allocated += mem_need-tmpsize;
+        memcache_stats.allocated += mem_need;
+        memcache_stats.allocated -= tmpsize;
     }
     cache[key] = element; //update stats!
     log_info << "Stored for key " << key << element.block << endl;
@@ -368,8 +369,10 @@ string Memcache::process_append(int socket, vector<string> tokens) {
         log_info <<key<<" is the key we try to append" << endl;
         update_store_fill(&element, tokens);
         string block = read_len(socket, str_cast<uint64_t>(tokens[2]));
+        log_info << "----------------------------------" <<block << endl;
         block = block.substr(0,block.size()-2); 
-        element.block += (block.c_str());
+        element.block = (block.c_str());
+        log_info << "----------------------------------" <<block << endl;
         bool no_reply = tokens.back() == "noreply";
         if(! no_reply) {
             output = "STORED";
@@ -482,6 +485,8 @@ string Memcache::process_replace(int socket, vector<string> tokens) {
         }
         //locking back the key again before saving
         Memcache::lock(key[0]);
+        memcache_stats.allocated += mem_need;
+        memcache_stats.allocated -= tmpsize;
 
         cache[key] = element; //update stats!
         UpdateCache(key, get_time());
@@ -537,8 +542,8 @@ string Memcache::process_cas(int socket, vector<string> tokens) {
             }
             //locking back the key again before saving
             Memcache::lock(key[0]);
-            memcache_stats.allocated += mem_need-tmpsize;
-
+            memcache_stats.allocated += mem_need;
+            memcache_stats.allocated -= tmpsize;
             cache[key] = element; //update stats!
             UpdateCache(key, get_time()); //update stats!
             log_info << "CAS Stored for key " << key << element.block << endl;
@@ -663,10 +668,24 @@ string Memcache::process_incr(int socket, vector<string> tokens){
             if(!is_number(res.block) || !is_number(tokens[1]))
                 output = "CLIENT_ERROR Cache value or incr val tokens by client is not a number";
             else{
+                uint64_t tmpsize = res.bytes;
                 res.block = to_string(str_cast<uint64_t>(res.block) + str_cast<uint64_t>(tokens[1]));
                 output = res.block;
                 res.bytes = res.block.size();
+                uint64_t mem_need = res.bytes;
+                Memcache::unlock(key[0]);   
+                if (!get_memory(mem_need))
+                {
+                    output = "SERVER_ERROR Memory";
+                    log_info << "Couldn't recover memory" << endl;
+                    return output;
+                }
+                //locking back the key again before saving
+                Memcache::lock(key[0]);
+                memcache_stats.allocated += mem_need;
+                memcache_stats.allocated -= tmpsize;
                 cache[key] = res;
+                UpdateCache(key, get_time()); //update stats!
             }
         }
         log_info << output << endl;
@@ -700,6 +719,7 @@ string Memcache::process_decr(int socket, vector<string> tokens){
             if(!is_number(res.block) || !is_number(tokens[1]))
                 output = "CLIENT_ERROR Cache value or decr val tokens by client is not a number";
             else{
+                uint64_t tmpsize = res.bytes;
                 uint64_t v1 = str_cast<uint64_t>(res.block);
                 uint64_t v2 = str_cast<uint64_t>(tokens[1]);
                 if(v1 < v2)
@@ -708,7 +728,20 @@ string Memcache::process_decr(int socket, vector<string> tokens){
                     res.block = to_string(v1-v2);
                 output = res.block;
                 res.bytes = res.block.size();
+                uint64_t mem_need = res.bytes;
+                Memcache::unlock(key[0]);   
+                if (!get_memory(mem_need))
+                {
+                    output = "SERVER_ERROR Memory";
+                    log_info << "Couldn't recover memory" << endl;
+                    return output;
+                }
+                //locking back the key again before saving
+                Memcache::lock(key[0]);
+                memcache_stats.allocated += mem_need;
+                memcache_stats.allocated -= tmpsize;
                 cache[key] = res;
+                UpdateCache(key, get_time()); //update stats!
             }
         }
         log_info << output << endl;
