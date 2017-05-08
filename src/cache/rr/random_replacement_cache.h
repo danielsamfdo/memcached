@@ -9,6 +9,7 @@ public:
 
     RandomReplacementCache(unsigned long long  size) : Memcache(size)
 	{
+		log_info << " RR CONSTRUCTOR "<<endl;
 	}
 
 // private:

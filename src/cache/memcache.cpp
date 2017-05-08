@@ -194,16 +194,18 @@ string Memcache::process_set(int socket, vector<string> tokens) {
         if (!get_memory(mem_need))
         {
             output = "SERVER_ERROR Memory";
+            log_info << "Couldn't recover memory" << endl;
             Memcache::unlock(key[0]);
             return output;
         }
+        memcache_stats.allocated += mem_need;
     }
     cache[key] = element; //update stats!
     log_info << "Stored for key " << key << element.block << endl;
     if(! no_reply) {
         output = "STORED";
     }
-    memcache_stats.allocated += mem_need;
+    
     // std::cout << typeid(element).name() << "\n*******************";
     UpdateCache(key,&element, get_time()); 
     // log_info << "Unlocking " << key[0] << endl;
