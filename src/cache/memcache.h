@@ -22,10 +22,13 @@ protected:
     MemcacheElement store_fill(vector<string> tokens);
     unordered_map<string, int > operation;
     static unsigned long long cas_uniq_counter;
-    std::mutex Mutexvariables[256]; 
+    std::mutex Mutexvariables[256];
+    unsigned long long  size;
 
 public:
-    Memcache(){
+    Memcache(unsigned long long  size){
+        this->size =size;
+
         operation.insert(pair<string,int>("set",OPERATIONS::set) );
         operation.insert(pair<string,int>("get",OPERATIONS::get) );
         operation.insert(pair<string,int>("add",OPERATIONS::add) );

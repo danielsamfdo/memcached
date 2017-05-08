@@ -1,29 +1,30 @@
-MemcacheServer::MemcacheServer(int cache_type) : TCPServer() {
-    init(cache_type);
+MemcacheServer::MemcacheServer(unsigned long long  size, int cache_type) : TCPServer() {
+    init(size, cache_type);
 }
 
-MemcacheServer::MemcacheServer(int cache_type, int max_conn_backlog) : TCPServer(max_conn_backlog) {
-    init(cache_type);
+MemcacheServer::MemcacheServer(unsigned long long  size, int cache_type, int max_conn_backlog) : TCPServer(max_conn_backlog) {
+    init(size, cache_type);
 }
 
 
-void MemcacheServer::init(int cache_type) {
+void MemcacheServer::init(unsigned long long  size, int cache_type) {
     suffix = "\r\n";
+    this->size = size;
 
     switch(cache_type) {
         case 1: {
-            shared_ptr<LRUCache> lru = make_shared<LRUCache>();
+            shared_ptr<LRUCache> lru = make_shared<LRUCache>(size);
             log_info << "Starting LRU CACHE MEMCACHED " << endl;
             cache = lru;
             break;
         }
         case 2: {
-            shared_ptr<RandomReplacementCache> rr = make_shared<RandomReplacementCache>();
+            shared_ptr<RandomReplacementCache> rr = make_shared<RandomReplacementCache>(size);
             cache = rr;
             break;
         }
         case 3: {
-            shared_ptr<LandlordCache> ll = make_shared<LandlordCache>();
+            shared_ptr<LandlordCache> ll = make_shared<LandlordCache>(size);
             cache = ll;
             break;
         }

@@ -19,14 +19,14 @@ class LRUCacheElement: public MemcacheElement
 {
 public:
 	TimeNode *lastaccess = nullptr;
-	LRUCacheElement();	
+	//LRUCacheElement();
 };
 
 
 class LRUCache : public Memcache {
 public:
 
-	LRUCache()
+	LRUCache(unsigned long long  size) : Memcache(size)
 	{
 		head = nullptr;
 		tail = nullptr;
