@@ -171,8 +171,11 @@ string Memcache::process_add(int socket, vector<string> tokens) {
     return output;
 }
 
-string response_get(string key, MemcacheElement elt){
-    return "VALUE " + key + " " + to_string(elt.flags) + " " + to_string(elt.bytes) + "\r\n";
+string response_get(string key, MemcacheElement elt, bool gets){
+    string cas = "";
+    if(gets)
+        cas = " " + to_string(elt.cas_unique);
+    return "VALUE " + key + " " + to_string(elt.flags) + " " + to_string(elt.bytes) + cas + "\r\n";
 }
 
 
@@ -307,7 +310,7 @@ string Memcache::process_cas(int socket, vector<string> tokens) {
 }
 
 
-string Memcache::process_get(int socket, vector<string> keys) {
+string Memcache::process_get(int socket, vector<string> keys, bool gets) {
     string output = "";
     unordered_map<string, MemcacheElement>::iterator cache_iterator;
     MemcacheElement* res;
@@ -320,8 +323,7 @@ string Memcache::process_get(int socket, vector<string> keys) {
         }
         else{
             res = &cache_iterator->second;
-            
-            string response = response_get(keys[it], *res);
+            string response = response_get(keys[it], *res, gets);
             log_info << "Present in CACHE" << endl;
             output += response;
             output += res->block;
@@ -354,12 +356,11 @@ string Memcache::process_version(){
 }
 
 void Memcache::process_quit(){
-    return;
+    return ;
     // return "1.5.8";
 }
 
 void Memcache::process_flush_all(){
-
     cache.clear();
     return ;
 }
@@ -395,8 +396,39 @@ string Memcache::process_delete(int socket, vector<string> tokens){
     return output;
 }
 
-string Memcache::process_incr(int socket, vector<string> keys){
+string Memcache::process_incr(int socket, vector<string> tokens){
+    string output = "";
+    unordered_map<string, MemcacheElement>::iterator cache_iterator;
+    MemcacheElement res;
+    string key = tokens[0];
+    Memcache::lock(key[0]);
+    try {
+        cache_iterator = cache.find(key);
+        if ( cache_iterator == cache.end() ){
+            output = "CLIENT_ERROR";
+        }
+        else{
+            res = cache_iterator->second;
+            log_info << "Present in CACHE" << endl;
+            if(!is_number(res.block))
+                output = "CLIENT_ERROR ";
+            else{
 
+                output = "";
+            }
+        }
+        log_info << output << endl;
+        bool no_reply = tokens.back() == "noreply";
+        if(no_reply){
+            output = "";
+        }
+    }
+    catch (exception& e)
+    {
+        log_error << e.what() << endl;
+    }
+    Memcache::unlock(key[0]);
+    return output;
     // stoi( str );
     return "";
 }
@@ -406,5 +438,6 @@ string Memcache::process_decr(int socket, vector<string> keys){
 }
 
 string Memcache::process_gets(int socket, vector<string> keys){
-    return "";
+
+    return process_get(socket, keys, true);
 }

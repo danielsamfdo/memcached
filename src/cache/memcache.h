@@ -54,7 +54,7 @@ public:
     string process_cas(int socket, vector<string> tokens);
 
     // Retrieval commands
-    string process_get(int socket, vector<string> tokens);
+    string process_get(int socket, vector<string> tokens, bool gets=false);
     string process_gets(int socket, vector<string> tokens);
     string process_delete(int socket, vector<string> tokens);
     string process_incr(int socket, vector<string> tokens);
