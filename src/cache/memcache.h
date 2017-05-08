@@ -12,6 +12,7 @@
 #include <mutex>
 
 #include "statistics.h"
+#define NLOCKS 256
 using namespace std;
 enum OPERATIONS{set=1, add=2, replace=3, append=4, prepend=5, cas=6, get=7, version=8, quit=9, bg_gets=10, del=11, incr=12, decr=13, flush_all=14};
 
@@ -22,7 +23,7 @@ protected:
     MemcacheElement store_fill(vector<string> tokens);
     unordered_map<string, int > operation;
     static unsigned long long cas_uniq_counter;
-    std::mutex Mutexvariables[256];
+    std::mutex Mutexvariables[NLOCKS];
     unsigned long long  size;
 
 public:
@@ -71,6 +72,8 @@ public:
     // Other Locking
     void lock(char key);
     void unlock(char key);
+    void lockAll();
+    void unlockAll();
 
 };
 
