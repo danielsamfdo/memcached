@@ -29,17 +29,17 @@ protected:
     
     unordered_map<string, int > operation;
     static unsigned long long cas_uniq_counter;
-    size_t capacity = 50;
+    uint64_t capacity = 50;
     typedef std::chrono::high_resolution_clock Time_obj;
     typedef std::chrono::high_resolution_clock::time_point time_p;
 
     time_p time_start;
     std::mutex Mutexvariables[NLOCKS];
-    unsigned long long  size;
+    // unsigned long long  size;
 
 public:
-    Memcache(unsigned long long  size){
-        this->size =size;
+    Memcache(uint64_t  size){
+        this->capacity =size;
 
         operation.insert(pair<string,int>("set",OPERATIONS::set) );
         operation.insert(pair<string,int>("get",OPERATIONS::get) );
@@ -63,9 +63,9 @@ public:
     static unsigned long long get_cas_counter();
     string process_command(int socket, string command);
 
-    int get_memory(size_t mem_need);
+    int get_memory(uint64_t mem_need);
     uint64_t get_time();
-    virtual int Evict(size_t mem_need);
+    virtual int Evict(uint64_t mem_need);
     virtual void UpdateCache(string key,MemcacheElement *e, uint64_t pt);
 
     string response_get(string key, MemcacheElement elt, bool gets);

@@ -97,7 +97,7 @@ unsigned long long Memcache::get_cas_counter(){
 }
 
 
-int Memcache::get_memory(size_t mem_need)
+int Memcache::get_memory(uint64_t mem_need)
 {
 
     if (capacity-memcache_stats.allocated>=mem_need && memcache_stats.allocated <=capacity)
@@ -122,7 +122,7 @@ uint64_t Memcache::get_time()
     return uint64_t((p-time_start).count());
 }
 
-int Memcache::Evict(size_t mem_need)
+int Memcache::Evict(uint64_t mem_need)
 {
     log_info << "shit got real3" <<endl;
     return 0;
@@ -186,22 +186,25 @@ string Memcache::process_set(int socket, vector<string> tokens) {
     if (element.lastaccess == nullptr )log_info << "LRU element" <<endl;
 
     // Get the memory cleared if cache is full
+    size_t mem_need = element.bytes;
+    log_info<< memcache_stats.allocated<< "  " << capacity << "  " << capacity-memcache_stats.allocated << "  " << mem_need<<endl;
     if (flag)
     {
-        size_t mem_need = element.bytes;
-        log_info<< memcache_stats.allocated<< "  " << capacity << "  " << capacity-memcache_stats.allocated << "  " << mem_need<<endl;
-        if (get_memory(mem_need))
+        if (!get_memory(mem_need))
         {
-            cache[key] = element; //update stats!
-            log_info << "Stored for key " << key << element.block << endl;
-            if(! no_reply) {
-                output = "STORED";
-            }
-            memcache_stats.allocated += mem_need;
-            // std::cout << typeid(element).name() << "\n*******************";
-            UpdateCache(key,&element, get_time());    
+            output = "SERVER_ERROR Memory";
+            Memcache::unlock(key[0]);
+            return output;
         }
     }
+    cache[key] = element; //update stats!
+    log_info << "Stored for key " << key << element.block << endl;
+    if(! no_reply) {
+        output = "STORED";
+    }
+    memcache_stats.allocated += mem_need;
+    // std::cout << typeid(element).name() << "\n*******************";
+    UpdateCache(key,&element, get_time()); 
     // log_info << "Unlocking " << key[0] << endl;
     Memcache::unlock(key[0]);
     return output;

@@ -14,7 +14,7 @@ public:
 // private:
 // 
 	void UpdateCache(string key, MemcacheElement *e, uint64_t pt){}
-	int Evict(size_t mem_need)
+	int Evict(uint64_t mem_need)
 	{
 		/*
 		Parameters:
@@ -23,8 +23,8 @@ public:
 		:: returns 1 if evicted the needed memory else returns 0
 		*/
 		
-		size_t claimed = 0;
-		size_t avail = capacity - memcache_stats.allocated;
+		uint64_t claimed = 0;
+		uint64_t avail = capacity - memcache_stats.allocated;
 		while(claimed+avail<mem_need)
 		{
 			if (cache.size()>0)
