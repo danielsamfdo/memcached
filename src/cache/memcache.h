@@ -29,7 +29,8 @@ protected:
     
     unordered_map<string, int > operation;
     static unsigned long long cas_uniq_counter;
-    uint64_t capacity = 50;
+    uint64_t capacity;
+    uint64_t max_val_bytes_possible;
     typedef std::chrono::high_resolution_clock Time_obj;
     typedef std::chrono::high_resolution_clock::time_point time_p;
 
@@ -40,7 +41,7 @@ protected:
 public:
     Memcache(uint64_t  size){
         this->capacity =size;
-
+        this->max_val_bytes_possible = capacity;
         operation.insert(pair<string,int>("set",OPERATIONS::set) );
         operation.insert(pair<string,int>("get",OPERATIONS::get) );
         operation.insert(pair<string,int>("add",OPERATIONS::add) );
@@ -67,7 +68,7 @@ public:
     uint64_t get_time();
     virtual int Evict(uint64_t mem_need);
     virtual void UpdateCache(string key,MemcacheElement *e, uint64_t pt);
-
+    string valid_format_storage_commands(vector<string> tokens, bool cas=false);
     string response_get(string key, MemcacheElement elt, bool gets);
     void update_store_fill(MemcacheElement *element,vector<string> tokens, bool just_bytes=false);
     void store_fill(vector<string> tokens, MemcacheElement *element);

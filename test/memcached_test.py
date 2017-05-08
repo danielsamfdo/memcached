@@ -90,6 +90,7 @@ class TestMemcache(unittest.TestCase):
     #     else:
     #         self.fail(
     #             "Expected Client.MemcachedKeyCharacterError, nothing raised")
+    #     self.mc.set("this has spaces", 1)
 
     # def test_sending_control_characters(self):
     #     try:
@@ -108,7 +109,7 @@ class TestMemcache(unittest.TestCase):
         else:
             self.fail(
                 "Expected Client.MemcachedKeyLengthError, nothing raised")
-        
+
         # These should work.
         self.mc.set('a' * SERVER_MAX_KEY_LENGTH, 1)
         self.mc.set('a' * SERVER_MAX_KEY_LENGTH, 1, noreply=True)
@@ -139,17 +140,17 @@ class TestMemcache(unittest.TestCase):
     #     # This test fails if the -I option is used on the memcached server
     #     self.assertTrue(self.mc.get(key) is None)
 
-    # def test_get_set_multi_key_prefix(self):
-    #     """Testing set_multi() with no memcacheds running."""
+    def test_get_set_multi_key_prefix(self):
+        """Testing set_multi() with no memcacheds running."""
 
-    #     prefix = 'pfx_'
-    #     values = {'key1': 'a', 'key2': 'b'}
-    #     errors = self.mc.set_multi(values, key_prefix=prefix)
-    #     self.assertEqual(errors, [])
+        prefix = 'pfx_'
+        values = {'key1': 'a', 'key2': 'b'}
+        errors = self.mc.set_multi(values, key_prefix=prefix)
+        self.assertEqual(errors, [])
 
-    #     keys = list(values)
-    #     self.assertEqual(self.mc.get_multi(keys, key_prefix=prefix),
-    #                      values)
+        keys = list(values)
+        self.assertEqual(self.mc.get_multi(keys, key_prefix=prefix),
+                         values)
 
     # def test_set_multi_dead_servers(self):
     #     """Testing set_multi() with no memcacheds

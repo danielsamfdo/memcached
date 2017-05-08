@@ -23,3 +23,13 @@
 Low priority 
 Statistics
 Setup Daemon
+
+
+
+Check formats
+Add Locks 
+Add Test Cases
+Add Unicode Keys
+Storage Operations
+Handle Eviction
+Statistics

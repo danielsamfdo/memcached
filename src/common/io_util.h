@@ -27,10 +27,10 @@ string read_suffix(int socket, string suffix) {
     return command;
 }
 
-string read_len(int socket, int bytes) {
+string read_len(int socket, unsigned long long bytes) {
 
     string block;
-    int bytes_read = 0;
+    unsigned long long bytes_read = 0;
     char buffer[MAX_READ_LEN] = {0};
     int read_len = 0;
 

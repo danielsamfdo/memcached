@@ -166,11 +166,43 @@ string key_size_check(string key){
     return "OK";
 }
 
-string valid_format_storage_commands(vector<string> tokens, bool cas=false){
+string Memcache::valid_format_storage_commands(vector<string> tokens, bool cas) {
+    if(!cas){
+        for(int i=0;i< tokens.size();i++)
+            log_info << tokens[i] << endl;
+
+        log_info << "KEY FORMAT CHECK " << to_string(tokens.size()) << (tokens.size()==4 || (tokens.size() == 5 && tokens.back()=="noreply")) << endl;
+        if((tokens.size()==4 || (tokens.size() == 5 && tokens.back()=="noreply"))){
+
+            if(!is_number(tokens[1]) || !is_number(tokens[2]) || !is_number(tokens[3]))
+                return "CLIENT_ERROR Format of command is invalid";
+            log_info << (max_val_bytes_possible < str_cast<uint64_t>(tokens[3])) << " is checked asked for : " << str_cast<uint64_t>(tokens[3]) <<  " with max cap : " << max_val_bytes_possible << endl;
+            if(max_val_bytes_possible < str_cast<uint64_t>(tokens[3])){
+                return "CLIENT_ERROR MAX VALUE THAT CAN BE STORED IS " + to_string(max_val_bytes_possible);
+            }
+        }
+        else{
+            return "CLIENT_ERROR Format of command is invalid";
+        }
+    }
+    if(cas){
+        if((tokens.size()==5 || (tokens.size() == 6 && tokens.back()=="noreply"))){
+            if(!is_number(tokens[1]) || !is_number(tokens[2]) || !is_number(tokens[3]) || !is_number(tokens[4]) )
+                return "CLIENT_ERROR Format of command is invalid";
+            log_info << (max_val_bytes_possible < str_cast<uint64_t>(tokens[3])) << " is checked asked for : " << str_cast<uint64_t>(tokens[3]) <<  " with max cap : " << max_val_bytes_possible << endl;
+            if(max_val_bytes_possible < str_cast<uint64_t>(tokens[3])){
+                return "CLIENT_ERROR MAX VALUE THAT CAN BE STORED IS " + to_string(max_val_bytes_possible);
+            }
+        }
+        else{
+            return "CLIENT_ERROR Format of command is invalid";
+        }
+    }
     string response = key_size_check(tokens[0]);
     if(response != "OK"){
         return response;
     }
+
     return "OK";
 }
 
@@ -181,6 +213,7 @@ string Memcache::process_set(int socket, vector<string> tokens) {
     string output;
     string response = valid_format_storage_commands(tokens);
     if(response != "OK"){
+        log_info << response;
         return response;
     }
     unordered_map<string, MemcacheElement>::iterator cache_iterator;
@@ -286,7 +319,7 @@ string Memcache::process_append(int socket, vector<string> tokens) {
         MemcacheElement element = cache_iterator->second;
         log_info <<key<<" is the key we try to append" << endl;
         update_store_fill(&element, tokens);
-        string block = read_len(socket, str_cast<int>(tokens[2])+2);
+        string block = read_len(socket, str_cast<unsigned long long>(tokens[2]));
         block = block.substr(0,block.size()-2); 
         element.block += (block.c_str());
         bool no_reply = tokens.back() == "noreply";
