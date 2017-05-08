@@ -26,7 +26,7 @@ protected:
     
     unordered_map<string, int > operation;
     static unsigned long long cas_uniq_counter;
-    size_t capacity = 30;
+    size_t capacity = 50;
     typedef std::chrono::high_resolution_clock Time_obj;
     typedef std::chrono::high_resolution_clock::time_point time_p;
 

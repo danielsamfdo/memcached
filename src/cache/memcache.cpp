@@ -84,7 +84,7 @@ unsigned long long Memcache::get_cas_counter(){
 int Memcache::get_memory(size_t mem_need)
 {
 
-    if (capacity-memcache_stats.allocated>=mem_need)
+    if (capacity-memcache_stats.allocated>=mem_need && memcache_stats.allocated <=capacity)
     {
         
         return 1;
@@ -102,7 +102,8 @@ uint64_t Memcache::get_time()
     /*
     Returns current timestamp in seconds
     */
-    return uint64_t((Time_obj::now()-time_start).count());
+    time_p p = Time_obj::now();
+    return uint64_t((p-time_start).count());
 }
 
 int Memcache::Evict(size_t mem_need)
@@ -119,6 +120,7 @@ void Memcache::UpdateCache(string key,MemcacheElement *e, uint64_t pt)
 string Memcache::process_set(int socket, vector<string> tokens) {
 
     /** Sample implementation **/
+    log_info << "dddddddddddddddddddddddddddddddddddddddddddddddddddd"<<cache.size()<<endl;
     string output;
     string key = tokens[0];
     tokens.erase(tokens.begin());
@@ -134,7 +136,7 @@ string Memcache::process_set(int socket, vector<string> tokens) {
 
     // Get the memory cleared if cache is full
     size_t mem_need = element.bytes;
-
+    log_info<< memcache_stats.allocated<< "  " << capacity << "  " << capacity-memcache_stats.allocated << "  " << mem_need<<endl;
     if (get_memory(mem_need))
     {
         cache[key] = element; //update stats!
@@ -143,7 +145,7 @@ string Memcache::process_set(int socket, vector<string> tokens) {
             output = "STORED";
         }
         memcache_stats.allocated += mem_need;
-        std::cout << typeid(element).name() << "\n*******************";
+        // std::cout << typeid(element).name() << "\n*******************";
         UpdateCache(key,&element, get_time());
     }
 

@@ -26,6 +26,8 @@
 class LRUCache : public Memcache {
 public:
 	// typedef LRUCacheElement MemcacheElement;
+	TimeNode **head;
+	TimeNode **tail;
 	LRUCache()
 	{
 		head = nullptr;
@@ -35,13 +37,12 @@ public:
 
 // private:
 
-	TimeNode **head;
-	TimeNode **tail;
+
 
 	void UpdateCache(string key, MemcacheElement *e, uint64_t pt)// override
 	{
 		//Delete the key in the past timestamp
-		log_info << "shit got real  &&&&&&&&&&&&&&&&&&&&&&" <<endl;
+		
 		TimeNode *t = e->lastaccess;
 		if (t!=nullptr)
 		{
@@ -58,21 +59,40 @@ public:
 			(t->keys).erase((t->keys).begin()+ind);
 		}
 
-		//Make new timestamp and update info there and the tail pointer
+		// Make new timestamp and update info there and the tail pointer
 		TimeNode *nt  = new TimeNode();
+		
 		nt->ptime = get_time();
 		nt->keys.push_back(key);
 		e->lastaccess = nt;
+		TimeNode *tmp = nt;
+		while(tmp!=nullptr)
+		{
+			log_info << tmp->ptime << endl;
+			tmp = tmp->next;
+		}
 		if (head==nullptr)
 		{
 			head = &nt;
 			tail = &nt;
+			nt->next = nullptr;
+			// log_info << "shit got real  1&&&&&&&&&&&&&&&&&&&&&&" <<nt->ptime<<endl;
+			tmp = nt;
+			while(tmp!=nullptr)
+			{
+				log_info << tmp->ptime << endl;
+				tmp = tmp->next;
+			}
 		}
 		else
 		{
 			(*tail)->next = nt;
+			// log_info << "shit got real  2&&&&&&&&&&&&&&&&&&&&&&" << (*tail)->ptime<<endl;
 			tail = &nt;
+			nt->next = nullptr;
+			// log_info << "shit got real  3&&&&&&&&&&&&&&&&&&&&&&" << nt->ptime<<endl;
 		}
+		
 	}
 
 	int Evict(size_t mem_need)
@@ -83,15 +103,19 @@ public:
 		Return:
 		:: returns 1 if evicted the needed memory else returns 0
 		*/
-		log_info << "shit got real2 &&&&&&&&&&&&&&&&&&&&&&&" <<endl;
+		
 		size_t claimed = 0;
 		while(claimed<mem_need)
 		{
+
 			if (*head == *tail)
 			{
+				
 				memcache_stats.allocated -= claimed;
+				// log_info << "shit got real2 &&&&&&&&&&&&&&&&&&&&&&&" << claimed << " " << (*head)->ptime<<endl;
 				return 0;
 			}
+			// log_info << "shit got real2 &&&&&&&&&&&&&&&&&&&&&&&" <<endl;
 			TimeNode *pt = *head;
 			int s = (pt->keys).size();
 			for(int i=0;i<s;i++)
@@ -102,6 +126,7 @@ public:
 				cache.erase(key);
 				head = &(pt->next);
 			}
+			log_info << "shit got real2 &&&&&&&&&&&&&&&&&&&&&&&" <<endl;
 		}
 		memcache_stats.allocated -= claimed;
 		//assign the size var to (size-claimed)
