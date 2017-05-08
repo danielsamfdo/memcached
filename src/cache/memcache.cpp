@@ -435,6 +435,8 @@ string Memcache::process_incr(int socket, vector<string> tokens){
             else{
                 res.block = to_string(str_cast<uint64_t>(res.block) + str_cast<uint64_t>(tokens[1]));
                 output = res.block;
+                res.bytes = res.block.size();
+                cache[key] = res;
             }
         }
         log_info << output << endl;
@@ -468,9 +470,15 @@ string Memcache::process_decr(int socket, vector<string> tokens){
             if(!is_number(res.block) || !is_number(tokens[1]))
                 output = "CLIENT_ERROR Cache value or decr val tokens by client is not a number";
             else{
-                str_cast<uint64_t>(res.block);
-                res.block = to_string( + str_cast<uint64_t>(tokens[1]));
+                uint64_t v1 = str_cast<uint64_t>(res.block);
+                uint64_t v2 = str_cast<uint64_t>(tokens[1]);
+                if(v1 < v2)
+                    res.block = to_string(0);
+                else
+                    res.block = to_string(v1-v2);
                 output = res.block;
+                res.bytes = res.block.size();
+                cache[key] = res;
             }
         }
         log_info << output << endl;
