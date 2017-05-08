@@ -37,6 +37,21 @@ public:
 	virtual void Clear_CacheElement(string key)
 	{
 		MemcacheElement *e = &cache[key];
+		TimeNode *t = e->lastaccess;
+		if (t!=nullptr)
+		{
+			int ind = -1;
+			int s = (t->keys).size();
+			for(int i=0;i<s;i++)
+			{
+				if (key == (t->keys)[i])
+				{
+					ind = i;
+					break;
+				}
+			}
+			(t->keys).erase((t->keys).begin()+ind);
+		}
 
 	}
     virtual void Clear_CacheAll()
@@ -54,65 +69,46 @@ public:
     }
     
 
-	void UpdateCache(vector<string> keys, uint64_t pt)// override
+	void UpdateCache(string key, uint64_t pt)// override
 	{
 		//Delete the key in the past timestamp
-		for (int j=0;j<keys.size();j++)
-		{
-			string key = keys[j];
-			MemcacheElement *e = &cache[key];
-			log_info<<"UC"<<endl;
-			TimeNode *t = e->lastaccess;
-			if (t!=nullptr)
-			{
-				int ind = -1;
-				int s = (t->keys).size();
-				for(int i=0;i<s;i++)
-				{
-					if (key == (t->keys)[i])
-					{
-						ind = i;
-						break;
-					}
-				}
-				(t->keys).erase((t->keys).begin()+ind);
-			}
+		MemcacheElement *e = &cache[key];
+		Clear_CacheElement(key);
 
-			// Make new timestamp and update info there and the tail pointer
-			TimeNode *nt  = new TimeNode();
-			
-			nt->ptime = get_time();
-			nt->keys.push_back(key);
-			e->lastaccess = nt;
-			TimeNode *tmp = nt;
+		// Make new timestamp and update info there and the tail pointer
+		TimeNode *nt  = new TimeNode();
+		
+		nt->ptime = get_time();
+		nt->keys.push_back(key);
+		e->lastaccess = nt;
+		TimeNode *tmp = nt;
+		while(tmp!=nullptr)
+		{
+			log_info << "Cic"<<tmp->ptime << endl;
+			tmp = tmp->next;
+		}
+		if (head==nullptr)
+		{
+			head = nt;
+			tail = nt;
+			// tmp1 = nt;
+			nt->next = nullptr;
+			// log_info << "shit got real  1&&&&&&&&&&&&&&&&&&&&&&" <<nt->ptime<<endl;
+			tmp = nt;
 			while(tmp!=nullptr)
 			{
-				log_info << "Cic"<<tmp->ptime << endl;
+				log_info << tmp->ptime << endl;
 				tmp = tmp->next;
 			}
-			if (head==nullptr)
-			{
-				head = nt;
-				tail = nt;
-				// tmp1 = nt;
-				nt->next = nullptr;
-				// log_info << "shit got real  1&&&&&&&&&&&&&&&&&&&&&&" <<nt->ptime<<endl;
-				tmp = nt;
-				while(tmp!=nullptr)
-				{
-					log_info << tmp->ptime << endl;
-					tmp = tmp->next;
-				}
-			}
-			else
-			{
-				// log_info<<(*head)->ptime<<endl;
-				(tail)->next = nt;
-				// log_info << "shit got real  2&&&&&&&&&&&&&&&&&&&&&&" << (*tail)->ptime<<endl;
-				tail = nt;
-				nt->next = nullptr;
-				// log_info << "shit got real  3&&&&&&&&&&&&&&&&&&&&&&" << nt->ptime<<endl;
-			}
+		}
+		else
+		{
+			// log_info<<(*head)->ptime<<endl;
+			(tail)->next = nt;
+			// log_info << "shit got real  2&&&&&&&&&&&&&&&&&&&&&&" << (*tail)->ptime<<endl;
+			tail = nt;
+			nt->next = nullptr;
+			// log_info << "shit got real  3&&&&&&&&&&&&&&&&&&&&&&" << nt->ptime<<endl;
 		}
 		// log_info<<tmp1->ptime<<endl;
 		
@@ -126,14 +122,16 @@ public:
 		Return:
 		:: returns 1 if evicted the needed memory else returns 0
 		*/
-		
+		lockAll();
+		log_info<<"In Evict"<<endl;
 		uint64_t claimed = 0;
 		uint64_t avail = capacity - memcache_stats.allocated;
 		while(claimed+avail<mem_need)
 		{
 
-			if (head == tail)
+			if (head == nullptr)
 			{			
+				tail = nullptr;
 				memcache_stats.allocated -= claimed;
 				// log_info << "shit got real2 &&&&&&&&&&&&&&&&&&&&&&&" << claimed << " " << (*head)->ptime<<endl;
 				return 0;
@@ -154,6 +152,7 @@ public:
 		}
 		memcache_stats.allocated -= claimed;
 		//assign the size var to (size-claimed)
+		unlockAll();
 		return 1;
 	}
 

@@ -144,8 +144,8 @@ void Memcache::lockAll(){
     log_info<<"In lockall"<<endl;
     for(int i=0;i<NLOCKS;i++)
     {
-        char c = i;
-        log_info<< c <<endl;
+        // char c = i;
+        // log_info<< c <<endl;
         Mutexvariables[i].lock();
     }
     log_info << "Locking All Keys" << endl;
@@ -238,9 +238,11 @@ string Memcache::process_set(int socket, vector<string> tokens) {
     tokens.erase(tokens.begin());
     MemcacheElement element;
     bool flag = true;
+    uint64_t tmpsize = 0;
     if ( cache_iterator != cache.end() ){
         element = cache_iterator->second;
         flag = false;
+        tmpsize = element.bytes;
     }
     update_store_fill(&element, tokens, true);
 
@@ -252,7 +254,7 @@ string Memcache::process_set(int socket, vector<string> tokens) {
     // if (element.lastaccess == nullptr )log_info << "LRU element" <<endl;
 
     // Get the memory cleared if cache is full
-    size_t mem_need = element.bytes;
+    uint64_t mem_need = element.bytes;
     log_info<< memcache_stats.allocated<< "  " << capacity << "  " << capacity-memcache_stats.allocated << "  " << mem_need<<endl;
     if (flag)
     {
@@ -266,7 +268,7 @@ string Memcache::process_set(int socket, vector<string> tokens) {
         }
         //locking back the key again before saving
         Memcache::lock(key[0]);
-        memcache_stats.allocated += mem_need;
+        memcache_stats.allocated += mem_need-tmpsize;
     }
     cache[key] = element; //update stats!
     log_info << "Stored for key " << key << element.block << endl;
@@ -306,7 +308,21 @@ string Memcache::process_add(int socket, vector<string> tokens) {
 
         bool no_reply = tokens.back() == "noreply";
 
+        // Checking for memory in our cache
+        uint64_t mem_need = element.bytes;
+        Memcache::unlock(key[0]);   
+        if (!get_memory(mem_need))
+        {
+            output = "SERVER_ERROR Memory";
+            log_info << "Couldn't recover memory" << endl;
+            return output;
+        }
+        //locking back the key again before saving
+        Memcache::lock(key[0]);
+        memcache_stats.allocated += mem_need;
+
         cache[key] = element; //update stats!
+        UpdateCache(key, get_time());
         log_info << "Stored for key " << key << element.block << endl;
         if(! no_reply) {
             output = "STORED";
@@ -348,6 +364,7 @@ string Memcache::process_append(int socket, vector<string> tokens) {
     }
     else{
         MemcacheElement element = cache_iterator->second;
+        uint64_t tmpsize = element.bytes;
         log_info <<key<<" is the key we try to append" << endl;
         update_store_fill(&element, tokens);
         string block = read_len(socket, str_cast<uint64_t>(tokens[2]));
@@ -357,7 +374,20 @@ string Memcache::process_append(int socket, vector<string> tokens) {
         if(! no_reply) {
             output = "STORED";
         }
+        uint64_t mem_need = element.bytes;
+        Memcache::unlock(key[0]);   
+        if (!get_memory(mem_need))
+        {
+            output = "SERVER_ERROR Memory";
+            log_info << "Couldn't recover memory" << endl;
+            return output;
+        }
+        //locking back the key again before saving
+        Memcache::lock(key[0]);
+        memcache_stats.allocated += mem_need - tmpsize ;
+
         cache[key] = element; //update stats!
+        UpdateCache(key, get_time());
         log_info << "Stored for key " << key << element.block << endl;
         
     }
@@ -383,6 +413,7 @@ string Memcache::process_prepend(int socket, vector<string> tokens) {
     }
     else{
         MemcacheElement element = cache_iterator->second;
+        uint64_t tmpsize = element.bytes;
         log_info <<key<<" is the key we try to prepend" << endl;
         update_store_fill(&element, tokens);
         string block = read_len(socket, str_cast<uint64_t>(tokens[2])+2);
@@ -391,7 +422,20 @@ string Memcache::process_prepend(int socket, vector<string> tokens) {
 
         bool no_reply = tokens.back() == "noreply";
 
+        uint64_t mem_need = element.bytes;
+        Memcache::unlock(key[0]);   
+        if (!get_memory(mem_need))
+        {
+            output = "SERVER_ERROR Memory";
+            log_info << "Couldn't recover memory" << endl;
+            return output;
+        }
+        //locking back the key again before saving
+        Memcache::lock(key[0]);
+        memcache_stats.allocated += mem_need-tmpsize;
+
         cache[key] = element; //update stats!
+        UpdateCache(key, get_time());
         log_info << "Stored for key " << key << element.block << endl;
         if(! no_reply) {
             output = "STORED";
@@ -419,7 +463,8 @@ string Memcache::process_replace(int socket, vector<string> tokens) {
     }
     else{
         log_info <<key<<" is the key we try to replace" << endl;
-        MemcacheElement element;
+        MemcacheElement element = cache_iterator->second;
+        uint64_t tmpsize = element.bytes;
         update_store_fill(&element,tokens,true);
         string block = read_len(socket, element.bytes+2);
         block = block.substr(0,block.size()-2); 
@@ -427,7 +472,20 @@ string Memcache::process_replace(int socket, vector<string> tokens) {
 
         bool no_reply = tokens.back() == "noreply";
 
+        uint64_t mem_need = element.bytes;
+        Memcache::unlock(key[0]);   
+        if (!get_memory(mem_need))
+        {
+            output = "SERVER_ERROR Memory";
+            log_info << "Couldn't recover memory" << endl;
+            return output;
+        }
+        //locking back the key again before saving
+        Memcache::lock(key[0]);
+
         cache[key] = element; //update stats!
+        UpdateCache(key, get_time());
+
         log_info << "Stored for key " << key << element.block << endl;
         if(! no_reply) {
             output = "STORED";
@@ -456,7 +514,8 @@ string Memcache::process_cas(int socket, vector<string> tokens) {
     }
     else{
         log_info <<key<<" is the key we try to CAS" << endl;
-        MemcacheElement element;
+        MemcacheElement element = cache_iterator->second;
+        uint64_t tmpsize = element.bytes;
         update_store_fill(&element,tokens,true);
         string block = read_len(socket, element.bytes+2);
         block = block.substr(0,block.size()-2); 
@@ -468,7 +527,20 @@ string Memcache::process_cas(int socket, vector<string> tokens) {
         unsigned long long cas_uniq = stoull (tokens[3],&sz,0);
         if(cache[key].cas_unique == cas_uniq){
             output = "STORED";
+            uint64_t mem_need = element.bytes;
+            Memcache::unlock(key[0]);   
+            if (!get_memory(mem_need))
+            {
+                output = "SERVER_ERROR Memory";
+                log_info << "Couldn't recover memory" << endl;
+                return output;
+            }
+            //locking back the key again before saving
+            Memcache::lock(key[0]);
+            memcache_stats.allocated += mem_need-tmpsize;
+
             cache[key] = element; //update stats!
+            UpdateCache(key, get_time()); //update stats!
             log_info << "CAS Stored for key " << key << element.block << endl;
         } else {
             output = "EXISTS";
@@ -502,6 +574,7 @@ string Memcache::process_get(int socket, vector<string> keys, bool gets) {
             output += response;
             output += res->block;
             output += "\r\n"; 
+            UpdateCache(key, get_time());
             // string str((char *)res.block);
             // output += str + "\r\n";
         }
@@ -533,7 +606,9 @@ void Memcache::process_quit(int socket){
 
 void Memcache::process_flush_all(){
     Memcache::lockAll();
+    Clear_CacheAll();
     cache.clear();
+    memcache_stats.allocated = 0;
     Memcache::unlockAll();
     return ;
 }
@@ -552,6 +627,8 @@ string Memcache::process_delete(int socket, vector<string> tokens){
         else{
             res = cache_iterator->second;
             log_info << "Present in CACHE" << endl;
+            Clear_CacheElement(key);
+            memcache_stats.allocated -= res.bytes;
             cache.erase(key); 
             output = "DELETED";
         }
