@@ -269,6 +269,8 @@ string Memcache::process_set(int socket, vector<string> tokens) {
         //locking back the key again before saving
         Memcache::lock(key[0]);
         memcache_stats.allocated += mem_need;
+        cache_iterator = cache.find(key);
+        if ( cache_iterator != cache.end() )
         memcache_stats.allocated -= tmpsize;
     }
     cache[key] = element; //update stats!
@@ -387,8 +389,11 @@ string Memcache::process_append(int socket, vector<string> tokens) {
         }
         //locking back the key again before saving
         Memcache::lock(key[0]);
-        memcache_stats.allocated += mem_need - tmpsize ;
-
+        memcache_stats.allocated += mem_need;
+        cache_iterator = cache.find(key);
+        if ( cache_iterator != cache.end() )
+        memcache_stats.allocated -= tmpsize;
+        
         cache[key] = element; //update stats!
         UpdateCache(key, get_time());
         log_info << "Stored for key " << key << element.block << endl;
@@ -435,7 +440,13 @@ string Memcache::process_prepend(int socket, vector<string> tokens) {
         }
         //locking back the key again before saving
         Memcache::lock(key[0]);
-        memcache_stats.allocated += mem_need-tmpsize;
+        memcache_stats.allocated += mem_need;
+        cache_iterator = cache.find(key);
+        if ( cache_iterator != cache.end() )
+        memcache_stats.allocated += mem_need;
+        cache_iterator = cache.find(key);
+        if ( cache_iterator != cache.end() )
+        memcache_stats.allocated -= tmpsize;
 
         cache[key] = element; //update stats!
         UpdateCache(key, get_time());
@@ -486,6 +497,8 @@ string Memcache::process_replace(int socket, vector<string> tokens) {
         //locking back the key again before saving
         Memcache::lock(key[0]);
         memcache_stats.allocated += mem_need;
+        cache_iterator = cache.find(key);
+        if ( cache_iterator != cache.end() )
         memcache_stats.allocated -= tmpsize;
 
         cache[key] = element; //update stats!
@@ -543,6 +556,8 @@ string Memcache::process_cas(int socket, vector<string> tokens) {
             //locking back the key again before saving
             Memcache::lock(key[0]);
             memcache_stats.allocated += mem_need;
+            cache_iterator = cache.find(key);
+            if ( cache_iterator != cache.end() )
             memcache_stats.allocated -= tmpsize;
             cache[key] = element; //update stats!
             UpdateCache(key, get_time()); //update stats!
@@ -683,6 +698,8 @@ string Memcache::process_incr(int socket, vector<string> tokens){
                 //locking back the key again before saving
                 Memcache::lock(key[0]);
                 memcache_stats.allocated += mem_need;
+                cache_iterator = cache.find(key);
+                if ( cache_iterator != cache.end() )
                 memcache_stats.allocated -= tmpsize;
                 cache[key] = res;
                 UpdateCache(key, get_time()); //update stats!
@@ -739,6 +756,8 @@ string Memcache::process_decr(int socket, vector<string> tokens){
                 //locking back the key again before saving
                 Memcache::lock(key[0]);
                 memcache_stats.allocated += mem_need;
+                cache_iterator = cache.find(key);
+                if ( cache_iterator != cache.end() )
                 memcache_stats.allocated -= tmpsize;
                 cache[key] = res;
                 UpdateCache(key, get_time()); //update stats!

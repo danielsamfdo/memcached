@@ -8,6 +8,7 @@ mc.set("a","abcdefg")
 mc.set("b","abcdefg")
 mc.set("c","abcdefg")
 mc.set("d","abcdefg")
+mc.append("d","da")
 
 # value = mc.get("some_key")
 v2 = mc.get("some_key")
