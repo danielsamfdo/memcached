@@ -9,10 +9,13 @@
 #include <unordered_map>
 #include <common/log_util.h>
 #include <common/io_util.h>
+
 #include <time.h>
 #include <chrono>
+#include <mutex>
 
 #include "statistics.h"
+#define NLOCKS 256
 using namespace std;
 enum OPERATIONS{set=1, add=2, replace=3, append=4, prepend=5, cas=6, get=7, version=8, quit=9, bg_gets=10, del=11, incr=12, decr=13, flush_all=14};
 
@@ -31,9 +34,13 @@ protected:
     typedef std::chrono::high_resolution_clock::time_point time_p;
 
     time_p time_start;
+    std::mutex Mutexvariables[NLOCKS];
+    unsigned long long  size;
 
 public:
-    Memcache(){
+    Memcache(unsigned long long  size){
+        this->size =size;
+
         operation.insert(pair<string,int>("set",OPERATIONS::set) );
         operation.insert(pair<string,int>("get",OPERATIONS::get) );
         operation.insert(pair<string,int>("add",OPERATIONS::add) );
@@ -61,8 +68,8 @@ public:
     virtual int Evict(size_t mem_need);
     virtual void UpdateCache(string key,MemcacheElement *e, uint64_t pt);
 
-    string response_get(string key, MemcacheElement elt);
-    void update_store_fill(MemcacheElement *element,vector<string> tokens);
+    string response_get(string key, MemcacheElement elt, bool gets);
+    void update_store_fill(MemcacheElement *element,vector<string> tokens, bool just_bytes=false);
     void store_fill(vector<string> tokens, MemcacheElement *element);
     // Storage commands
     string process_set(int socket, vector<string> tokens);
@@ -73,17 +80,23 @@ public:
     string process_cas(int socket, vector<string> tokens);
 
     // Retrieval commands
-    string process_get(int socket, vector<string> tokens);
+    string process_get(int socket, vector<string> tokens, bool gets=false);
     string process_gets(int socket, vector<string> tokens);
     string process_delete(int socket, vector<string> tokens);
     string process_incr(int socket, vector<string> tokens);
     string process_decr(int socket, vector<string> tokens);
 
-
     // Misc Commands
     string process_version();
     void process_flush_all();
     void process_quit();
+
+    // Other Locking
+    void lock(char key);
+    void unlock(char key);
+    void lockAll();
+    void unlockAll();
+
 };
 
 #include "memcache.cpp"

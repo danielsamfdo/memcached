@@ -7,7 +7,9 @@ class RandomReplacementCache : public Memcache {
 
 public:
 
-	//RandomReplacementCache();
+    RandomReplacementCache(unsigned long long  size) : Memcache(size)
+	{
+	}
 
 // private:
 // 

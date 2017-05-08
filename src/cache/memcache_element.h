@@ -2,6 +2,8 @@
 #define MEMCACHED_CLONE_BRUTE_FORCE_MEMCACHE_ELEMENT_H
 
 #include <cstdint>
+#include <mutex>
+#include <pthread.h>
 
 struct TimeNode
 {
@@ -16,16 +18,18 @@ struct TimeNode
 class MemcacheElement
  {
  public:
- 	string block;
+   	string block;
     uint16_t flags;
     uint64_t exptime;
     size_t bytes;
     uint64_t cas_unique;
     TimeNode *lastaccess;
+
  	MemcacheElement()
  	{
  		lastaccess = nullptr;
  	};
+
 };
 
 #endif //MEMCACHED_CLONE_BRUTE_FORCE_MEMCACHE_ELEMENT_H

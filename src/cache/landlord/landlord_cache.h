@@ -5,6 +5,10 @@
 
 class LandlordCache : public Memcache {
 
+public:
+    LandlordCache(unsigned long long  size) : Memcache(size)
+    {
+    }
 };
 
 #include "landlord_cache.cpp"

@@ -13,12 +13,13 @@ class MemcacheServer : public TCPServer {
 private:
     string suffix;
     shared_ptr<Memcache> cache;
+    unsigned long long  size;
 
 public:
-    MemcacheServer(int cache_type);
-    MemcacheServer(int cache_type, int max_conn_backlog);
+    MemcacheServer(unsigned long long  size, int cache_type);
+    MemcacheServer(unsigned long long  size, int cache_type, int max_conn_backlog);
 
-    void init(int cache_type);
+    void init(unsigned long long  size, int cache_type);
     void process_conn(int socket);
     string read_command(int socket);
     string process_command(int socket, string command);

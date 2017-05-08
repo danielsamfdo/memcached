@@ -41,28 +41,28 @@ class TestMemcache(unittest.TestCase):
         self.check_setget("an_integer", 42)
         self.check_setget("an_integer_2", 42, noreply=True)
 
-    # def test_delete(self):
-    #     self.check_setget("long", int(1 << 30))
-    #     result = self.mc.delete("long")
-    #     self.assertEqual(result, True)
-    #     self.assertEqual(self.mc.get("long"), None)
+    def test_delete(self):
+        self.check_setget("long", int(1 << 30))
+        result = self.mc.delete("long")
+        self.assertEqual(result, True)
+        self.assertEqual(self.mc.get("long"), None)
 
-    # def test_get_multi(self):
-    #     self.check_setget("gm_a_string", "some random string")
-    #     self.check_setget("gm_an_integer", 42)
-    #     self.assertEqual(
-    #         self.mc.get_multi(["gm_a_string", "gm_an_integer"]),
-    #         {"gm_an_integer": 42, "gm_a_string": "some random string"})
+    def test_get_multi(self):
+        self.check_setget("gm_a_string", "some random string")
+        self.check_setget("gm_an_integer", 42)
+        self.assertEqual(
+            self.mc.get_multi(["gm_a_string", "gm_an_integer"]),
+            {"gm_an_integer": 42, "gm_a_string": "some random string"})
 
-    # def test_get_unknown_value(self):
-    #     self.mc.delete("unknown_value")
+    def test_get_unknown_value(self):
+        self.mc.delete("unknown_value")
 
-    #     self.assertEqual(self.mc.get("unknown_value"), None)
+        self.assertEqual(self.mc.get("unknown_value"), None)
 
-    # def test_setget_foostruct(self):
-    #     f = FooStruct()
-    #     self.check_setget("foostruct", f)
-    #     self.check_setget("foostruct_2", f, noreply=True)
+    def test_setget_foostruct(self):
+        f = FooStruct()
+        self.check_setget("foostruct", f)
+        self.check_setget("foostruct_2", f, noreply=True)
 
     # def test_incr(self):
     #     self.check_setget("i_an_integer", 42)

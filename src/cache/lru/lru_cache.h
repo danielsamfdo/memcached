@@ -15,12 +15,7 @@
 };*/
 
 
-// class LRUCacheElement: public MemcacheElement
-// {
-// public:
-// 	TimeNode *lastaccess = nullptr;
-// 	LRUCacheElement();	
-// };
+
 
 
 class LRUCache : public Memcache {
@@ -28,7 +23,7 @@ public:
 	// typedef LRUCacheElement MemcacheElement;
 	TimeNode **head;
 	TimeNode **tail;
-	LRUCache()
+	LRUCache(unsigned long long  size) : Memcache(size)
 	{
 		head = nullptr;
 		tail = nullptr;
