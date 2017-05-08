@@ -21,7 +21,7 @@ class MemcacheElement
    	string block;
     uint16_t flags;
     uint64_t exptime;
-    size_t bytes;
+    uint64_t bytes;
     uint64_t cas_unique;
     TimeNode *lastaccess;
 

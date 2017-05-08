@@ -27,10 +27,11 @@ string read_suffix(int socket, string suffix) {
     return command;
 }
 
-string read_len(int socket, unsigned long long bytes) {
+string read_len(int socket, uint64_t bytes) {
 
     string block;
-    unsigned long long bytes_read = 0;
+    block.reserve(bytes);
+    uint64_t bytes_read = 0;
     char buffer[MAX_READ_LEN] = {0};
     int read_len = 0;
 
