@@ -61,7 +61,7 @@ string Memcache::process_command(int socket, string command) {
             break;
         case OPERATIONS::quit :
             log_info << "QUIT METHOD " << endl;
-            process_quit();
+            process_quit(socket);
             break;
         case OPERATIONS::flush_all :
             log_info << "FLUSH ALL METHOD " << endl;
@@ -430,7 +430,11 @@ string Memcache::process_version(){
     return "1.5.8";
 }
 
-void Memcache::process_quit(){
+void Memcache::process_quit(int socket){
+    shutdown(socket, SHUT_RDWR);
+    close(socket);
+    //terminate();
+    //exit(0);
     return ;
     // return "1.5.8";
 }

@@ -35,6 +35,12 @@ void MemcacheServer::process_conn(int socket) {
 
     while(true) {
         string command = read_command(socket);
+
+        if(command.empty()) {
+            log_info << " Client connected closed, exiting, socket = " << socket << endl;
+            break;
+        }
+
         string output = process_command(socket, command);
 
         if(! output.empty()) {
