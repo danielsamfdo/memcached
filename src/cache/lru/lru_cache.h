@@ -21,9 +21,9 @@
 class LRUCache : public Memcache {
 public:
 	// typedef LRUCacheElement MemcacheElement;
-	TimeNode **head;
-	TimeNode **tail;
-	TimeNode *tmp1;
+	TimeNode *head;
+	TimeNode *tail;
+	// TimeNode *tmp1;
 	LRUCache(unsigned long long  size) : Memcache(size)
 	{
 		head = nullptr;
@@ -69,9 +69,9 @@ public:
 		}
 		if (head==nullptr)
 		{
-			head = &nt;
-			tail = &nt;
-			tmp1 = nt;
+			head = nt;
+			tail = nt;
+			// tmp1 = nt;
 			nt->next = nullptr;
 			// log_info << "shit got real  1&&&&&&&&&&&&&&&&&&&&&&" <<nt->ptime<<endl;
 			tmp = nt;
@@ -83,17 +83,17 @@ public:
 		}
 		else
 		{
-			log_info<<(*head)->ptime<<endl;
-			(*tail)->next = nt;
+			// log_info<<(*head)->ptime<<endl;
+			(tail)->next = nt;
 			// log_info << "shit got real  2&&&&&&&&&&&&&&&&&&&&&&" << (*tail)->ptime<<endl;
-			tail = &nt;
+			tail = nt;
 			nt->next = nullptr;
 			// log_info << "shit got real  3&&&&&&&&&&&&&&&&&&&&&&" << nt->ptime<<endl;
 		}
-		log_info<<tmp1->ptime<<endl;
+		// log_info<<tmp1->ptime<<endl;
 		
 	}
-
+// 
 	int Evict(uint64_t mem_need)
 	{
 		/*
@@ -108,14 +108,14 @@ public:
 		while(claimed+avail<mem_need)
 		{
 
-			if (*head == *tail)
+			if (head == tail)
 			{			
 				memcache_stats.allocated -= claimed;
 				// log_info << "shit got real2 &&&&&&&&&&&&&&&&&&&&&&&" << claimed << " " << (*head)->ptime<<endl;
 				return 0;
 			}
 			// log_info << "shit got real2 &&&&&&&&&&&&&&&&&&&&&&&" <<endl;
-			TimeNode *pt = *head;
+			TimeNode *pt = head;
 			int s = (pt->keys).size();
 			for(int i=0;i<s;i++)
 			{
@@ -123,8 +123,9 @@ public:
 				//LRUCacheElement e = ;
 				claimed += cache[key].bytes;
 				cache.erase(key);
-				head = &(pt->next);
 			}
+			head = (pt->next);
+
 			log_info << "shit got real2 &&&&&&&&&&&&&&&&&&&&&&&" <<endl;
 		}
 		memcache_stats.allocated -= claimed;
