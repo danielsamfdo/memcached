@@ -166,6 +166,7 @@ string Memcache::process_add(int socket, vector<string> tokens) {
     }
     else{
         // NO ACTION SHOULD BE DONE
+        output = "NOT_STORED";
     }
 
     return output;
@@ -248,6 +249,7 @@ string Memcache::process_replace(int socket, vector<string> tokens) {
     cache_iterator = cache.find(key);
     if ( cache_iterator == cache.end() ){
         // NO ACTION SHOULD BE DONE
+        output = "NOT_STORED";
     }
     else{
         log_info <<key<<" is the key we try to replace" << endl;
