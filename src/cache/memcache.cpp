@@ -362,7 +362,7 @@ string Memcache::process_append(int socket, vector<string> tokens) {
 
     cache_iterator = cache.find(key);
     if ( cache_iterator == cache.end() ){
-        output = "CLIENT_ERROR Key not present Cant be appended";
+        output = "CLIENT_ERROR Key not present Cant be fed";
         // NO ACTION SHOULD BE DONE
     }
     else{
@@ -370,10 +370,10 @@ string Memcache::process_append(int socket, vector<string> tokens) {
         uint64_t tmpsize = element.bytes;
         log_info <<key<<" is the key we try to append" << endl;
         update_store_fill(&element, tokens);
-        string block = read_len(socket, str_cast<uint64_t>(tokens[2]));
+        string block = read_len(socket, str_cast<uint64_t>(tokens[2])+2);
         log_info << "----------------------------------" <<block << endl;
         block = block.substr(0,block.size()-2); 
-        element.block = (block.c_str());
+        element.block += (block.c_str());
         log_info << "----------------------------------" <<block << endl;
         bool no_reply = tokens.back() == "noreply";
         if(! no_reply) {
