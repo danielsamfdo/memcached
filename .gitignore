@@ -2,6 +2,8 @@ a.out
 *.o
 cmake-build-debug
 .idea
+memo
+log
 
 
 
