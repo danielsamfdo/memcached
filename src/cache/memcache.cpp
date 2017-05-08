@@ -16,7 +16,6 @@ void Memcache::update_store_fill(MemcacheElement *element,vector<string> tokens,
 
 string Memcache::process_command(int socket, string command) {
     log_info << "Processing command " << command.c_str() << endl;
-    log_info << "Hi" << endl;
     vector<string> tokens = tokenize(command);
     for(int i=0;i<tokens.size();i++){
         log_info << tokens[i] << endl;
@@ -159,12 +158,31 @@ void Memcache::unlock(char key){
 
 }
 
+string key_size_check(string key){
+    int max_key_size = 250;
+    log_info << "CHECKING KEYS SIZE :: " << key.length() << endl;
+    if(key.length() > max_key_size)
+        return "CLIENT_ERROR length is > " + to_string(max_key_size);
+    return "OK";
+}
+
+string valid_format_storage_commands(vector<string> tokens, bool cas=false){
+    string response = key_size_check(tokens[0]);
+    if(response != "OK"){
+        return response;
+    }
+    return "OK";
+}
+
 string Memcache::process_set(int socket, vector<string> tokens) {
 
     /** Sample implementation **/
     
-    log_info << "dddddddddddddddddddddddddddddddddddddddddddddddddddd"<<cache.size()<<endl;
     string output;
+    string response = valid_format_storage_commands(tokens);
+    if(response != "OK"){
+        return response;
+    }
     unordered_map<string, MemcacheElement>::iterator cache_iterator;
     string key = tokens[0];
     Memcache::lock(key[0]);
