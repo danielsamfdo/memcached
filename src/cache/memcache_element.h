@@ -5,18 +5,29 @@
 #include <mutex>
 #include <pthread.h>
 
+struct TimeNode
+{
+	/*
+	Struct to keep track of timestamped data in order to evict with O(1)
+	*/
+	uint64_t ptime;
+	TimeNode *next = nullptr;
+	vector<string> keys;
+};
+
 class MemcacheElement
  {
  public:
    	string block;
     uint16_t flags;
-    time_t exptime;
+    uint64_t exptime;
     size_t bytes;
     uint64_t cas_unique;
+    TimeNode *lastaccess;
 
  	MemcacheElement()
  	{
- 		
+ 		lastaccess = nullptr;
  	};
 
 };

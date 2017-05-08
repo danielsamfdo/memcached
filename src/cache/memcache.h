@@ -1,6 +1,6 @@
 #ifndef MEMCACHED_CLONE_BRUTE_FORCE_MEMCACHE_H
 #define MEMCACHED_CLONE_BRUTE_FORCE_MEMCACHE_H
-
+#include <typeinfo>
 #include <iostream>
 #include <cstdlib>
 #include <sys/socket.h>
@@ -9,6 +9,9 @@
 #include <unordered_map>
 #include <common/log_util.h>
 #include <common/io_util.h>
+
+#include <time.h>
+#include <chrono>
 #include <mutex>
 
 #include "statistics.h"
@@ -18,17 +21,25 @@ enum OPERATIONS{set=1, add=2, replace=3, append=4, prepend=5, cas=6, get=7, vers
 
 class Memcache {
 
+public: 
+    // typedef MemElement MemcacheElement;
 protected:
+    
     unordered_map<string, MemcacheElement> cache;
-    MemcacheElement store_fill(vector<string> tokens);
+    
     unordered_map<string, int > operation;
     static unsigned long long cas_uniq_counter;
+    uint64_t capacity = 50;
+    typedef std::chrono::high_resolution_clock Time_obj;
+    typedef std::chrono::high_resolution_clock::time_point time_p;
+
+    time_p time_start;
     std::mutex Mutexvariables[NLOCKS];
-    unsigned long long  size;
+    // unsigned long long  size;
 
 public:
-    Memcache(unsigned long long  size){
-        this->size =size;
+    Memcache(uint64_t  size){
+        this->capacity =size;
 
         operation.insert(pair<string,int>("set",OPERATIONS::set) );
         operation.insert(pair<string,int>("get",OPERATIONS::get) );
@@ -45,10 +56,21 @@ public:
         operation.insert(pair<string,int>("incr",OPERATIONS::incr) );
         operation.insert(pair<string,int>("decr",OPERATIONS::decr) );
         // cas_uniq_counter = 0 ;
+        time_start = Time_obj::now();
+
     }
     Statistics memcache_stats;
     static unsigned long long get_cas_counter();
     string process_command(int socket, string command);
+
+    int get_memory(uint64_t mem_need);
+    uint64_t get_time();
+    virtual int Evict(uint64_t mem_need);
+    virtual void UpdateCache(string key,MemcacheElement *e, uint64_t pt);
+
+    string response_get(string key, MemcacheElement elt, bool gets);
+    void update_store_fill(MemcacheElement *element,vector<string> tokens, bool just_bytes=false);
+    void store_fill(vector<string> tokens, MemcacheElement *element);
     // Storage commands
     string process_set(int socket, vector<string> tokens);
     string process_replace(int socket, vector<string> tokens);
