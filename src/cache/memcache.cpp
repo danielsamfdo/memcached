@@ -132,8 +132,13 @@ void Memcache::UpdateCache(string key,MemcacheElement *e, uint64_t pt)
     log_info << "shit got real1" <<endl;
 }
 void Memcache::lockAll(){
+    log_info<<"In lockall"<<endl;
     for(int i=0;i<NLOCKS;i++)
+    {
+        char c = i;
+        log_info<< c <<endl;
         Mutexvariables[i].lock();
+    }
     log_info << "Locking All Keys" << endl;
     return ;
 }
@@ -235,20 +240,23 @@ string Memcache::process_set(int socket, vector<string> tokens) {
     element.block = (block.c_str());
     bool no_reply = tokens.back() == "noreply";
 
-    if (element.lastaccess == nullptr )log_info << "LRU element" <<endl;
+    // if (element.lastaccess == nullptr )log_info << "LRU element" <<endl;
 
     // Get the memory cleared if cache is full
     size_t mem_need = element.bytes;
     log_info<< memcache_stats.allocated<< "  " << capacity << "  " << capacity-memcache_stats.allocated << "  " << mem_need<<endl;
     if (flag)
     {
+        // Unlocking the present locked key so that evict can lock all keys
+        Memcache::unlock(key[0]);   
         if (!get_memory(mem_need))
         {
             output = "SERVER_ERROR Memory";
             log_info << "Couldn't recover memory" << endl;
-            Memcache::unlock(key[0]);
             return output;
         }
+        //locking back the key again before saving
+        Memcache::lock(key[0]);
         memcache_stats.allocated += mem_need;
     }
     cache[key] = element; //update stats!
