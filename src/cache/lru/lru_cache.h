@@ -24,7 +24,7 @@ public:
 	TimeNode *head;
 	TimeNode *tail;
 	// TimeNode *tmp1;
-	LRUCache(unsigned long long  size) : Memcache(size)
+	LRUCache(uint64_t  size) : Memcache(size)
 	{
 		head = nullptr;
 		tail = nullptr;
@@ -35,7 +35,7 @@ public:
 
 
 
-	void UpdateCache(string key, MemcacheElement *e, uint64_t pt)// override
+	void UpdateCache(vector<string> keys, MemcacheElement *e, uint64_t pt)// override
 	{
 		//Delete the key in the past timestamp
 		log_info<<"UC"<<endl;

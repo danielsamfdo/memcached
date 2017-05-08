@@ -7,7 +7,7 @@ class RandomReplacementCache : public Memcache {
 
 public:
 
-    RandomReplacementCache(unsigned long long  size) : Memcache(size)
+    RandomReplacementCache(uint64_t  size) : Memcache(size)
 	{
 		log_info << " RR CONSTRUCTOR "<<endl;
 	}
