@@ -21,8 +21,9 @@
 class LRUCache : public Memcache {
 public:
 	// typedef LRUCacheElement MemcacheElement;
-	TimeNode **head;
-	TimeNode **tail;
+	TimeNode *head;
+	TimeNode *tail;
+	// TimeNode *tmp1;
 	LRUCache(unsigned long long  size) : Memcache(size)
 	{
 		head = nullptr;
@@ -37,7 +38,7 @@ public:
 	void UpdateCache(string key, MemcacheElement *e, uint64_t pt)// override
 	{
 		//Delete the key in the past timestamp
-		
+		log_info<<"UC"<<endl;
 		TimeNode *t = e->lastaccess;
 		if (t!=nullptr)
 		{
@@ -63,13 +64,14 @@ public:
 		TimeNode *tmp = nt;
 		while(tmp!=nullptr)
 		{
-			log_info << tmp->ptime << endl;
+			log_info << "Cic"<<tmp->ptime << endl;
 			tmp = tmp->next;
 		}
 		if (head==nullptr)
 		{
-			head = &nt;
-			tail = &nt;
+			head = nt;
+			tail = nt;
+			// tmp1 = nt;
 			nt->next = nullptr;
 			// log_info << "shit got real  1&&&&&&&&&&&&&&&&&&&&&&" <<nt->ptime<<endl;
 			tmp = nt;
@@ -81,16 +83,18 @@ public:
 		}
 		else
 		{
-			(*tail)->next = nt;
+			// log_info<<(*head)->ptime<<endl;
+			(tail)->next = nt;
 			// log_info << "shit got real  2&&&&&&&&&&&&&&&&&&&&&&" << (*tail)->ptime<<endl;
-			tail = &nt;
+			tail = nt;
 			nt->next = nullptr;
 			// log_info << "shit got real  3&&&&&&&&&&&&&&&&&&&&&&" << nt->ptime<<endl;
 		}
+		// log_info<<tmp1->ptime<<endl;
 		
 	}
-
-	int Evict(size_t mem_need)
+// 
+	int Evict(uint64_t mem_need)
 	{
 		/*
 		Parameters:
@@ -99,19 +103,19 @@ public:
 		:: returns 1 if evicted the needed memory else returns 0
 		*/
 		
-		size_t claimed = 0;
-		while(claimed<mem_need)
+		uint64_t claimed = 0;
+		uint64_t avail = capacity - memcache_stats.allocated;
+		while(claimed+avail<mem_need)
 		{
 
-			if (*head == *tail)
-			{
-				
+			if (head == tail)
+			{			
 				memcache_stats.allocated -= claimed;
 				// log_info << "shit got real2 &&&&&&&&&&&&&&&&&&&&&&&" << claimed << " " << (*head)->ptime<<endl;
 				return 0;
 			}
 			// log_info << "shit got real2 &&&&&&&&&&&&&&&&&&&&&&&" <<endl;
-			TimeNode *pt = *head;
+			TimeNode *pt = head;
 			int s = (pt->keys).size();
 			for(int i=0;i<s;i++)
 			{
@@ -119,8 +123,9 @@ public:
 				//LRUCacheElement e = ;
 				claimed += cache[key].bytes;
 				cache.erase(key);
-				head = &(pt->next);
 			}
+			head = (pt->next);
+
 			log_info << "shit got real2 &&&&&&&&&&&&&&&&&&&&&&&" <<endl;
 		}
 		memcache_stats.allocated -= claimed;
