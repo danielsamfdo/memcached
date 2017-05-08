@@ -14,7 +14,7 @@ public:
 
 // private:
 // 
-	void UpdateCache(string key, MemcacheElement *e, uint64_t pt){}
+	void UpdateCache(vector<string> keys, uint64_t pt){}
 	int Evict(uint64_t mem_need)
 	{
 		/*

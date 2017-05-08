@@ -34,61 +34,85 @@ public:
 // private:
 
 
+	virtual void Clear_CacheElement(string key)
+	{
+		MemcacheElement *e = &cache[key];
 
-	void UpdateCache(vector<string> keys, MemcacheElement *e, uint64_t pt)// override
+	}
+    virtual void Clear_CacheAll()
+    {
+    	TimeNode *tp = head;
+    	TimeNode *tp2 = nullptr;
+    	head = nullptr;
+    	tail = nullptr;
+    	while(tp!=nullptr)
+    	{
+    		tp2 = tp;
+    		tp = tp->next;
+    		delete tp2;
+    	}
+    }
+    
+
+	void UpdateCache(vector<string> keys, uint64_t pt)// override
 	{
 		//Delete the key in the past timestamp
-		log_info<<"UC"<<endl;
-		TimeNode *t = e->lastaccess;
-		if (t!=nullptr)
+		for (int j=0;j<keys.size();j++)
 		{
-			int ind = -1;
-			int s = (t->keys).size();
-			for(int i=0;i<s;i++)
+			string key = keys[j];
+			MemcacheElement *e = &cache[key];
+			log_info<<"UC"<<endl;
+			TimeNode *t = e->lastaccess;
+			if (t!=nullptr)
 			{
-				if (key == (t->keys)[i])
+				int ind = -1;
+				int s = (t->keys).size();
+				for(int i=0;i<s;i++)
 				{
-					ind = i;
-					break;
+					if (key == (t->keys)[i])
+					{
+						ind = i;
+						break;
+					}
 				}
+				(t->keys).erase((t->keys).begin()+ind);
 			}
-			(t->keys).erase((t->keys).begin()+ind);
-		}
 
-		// Make new timestamp and update info there and the tail pointer
-		TimeNode *nt  = new TimeNode();
-		
-		nt->ptime = get_time();
-		nt->keys.push_back(key);
-		e->lastaccess = nt;
-		TimeNode *tmp = nt;
-		while(tmp!=nullptr)
-		{
-			log_info << "Cic"<<tmp->ptime << endl;
-			tmp = tmp->next;
-		}
-		if (head==nullptr)
-		{
-			head = nt;
-			tail = nt;
-			// tmp1 = nt;
-			nt->next = nullptr;
-			// log_info << "shit got real  1&&&&&&&&&&&&&&&&&&&&&&" <<nt->ptime<<endl;
-			tmp = nt;
+			// Make new timestamp and update info there and the tail pointer
+			TimeNode *nt  = new TimeNode();
+			
+			nt->ptime = get_time();
+			nt->keys.push_back(key);
+			e->lastaccess = nt;
+			TimeNode *tmp = nt;
 			while(tmp!=nullptr)
 			{
-				log_info << tmp->ptime << endl;
+				log_info << "Cic"<<tmp->ptime << endl;
 				tmp = tmp->next;
 			}
-		}
-		else
-		{
-			// log_info<<(*head)->ptime<<endl;
-			(tail)->next = nt;
-			// log_info << "shit got real  2&&&&&&&&&&&&&&&&&&&&&&" << (*tail)->ptime<<endl;
-			tail = nt;
-			nt->next = nullptr;
-			// log_info << "shit got real  3&&&&&&&&&&&&&&&&&&&&&&" << nt->ptime<<endl;
+			if (head==nullptr)
+			{
+				head = nt;
+				tail = nt;
+				// tmp1 = nt;
+				nt->next = nullptr;
+				// log_info << "shit got real  1&&&&&&&&&&&&&&&&&&&&&&" <<nt->ptime<<endl;
+				tmp = nt;
+				while(tmp!=nullptr)
+				{
+					log_info << tmp->ptime << endl;
+					tmp = tmp->next;
+				}
+			}
+			else
+			{
+				// log_info<<(*head)->ptime<<endl;
+				(tail)->next = nt;
+				// log_info << "shit got real  2&&&&&&&&&&&&&&&&&&&&&&" << (*tail)->ptime<<endl;
+				tail = nt;
+				nt->next = nullptr;
+				// log_info << "shit got real  3&&&&&&&&&&&&&&&&&&&&&&" << nt->ptime<<endl;
+			}
 		}
 		// log_info<<tmp1->ptime<<endl;
 		

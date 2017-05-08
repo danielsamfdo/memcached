@@ -127,9 +127,18 @@ int Memcache::Evict(uint64_t mem_need)
     return 0;
 }
 
-void Memcache::UpdateCache(string key,MemcacheElement *e, uint64_t pt)
+void Memcache::UpdateCache(string key, uint64_t pt)
 {
     log_info << "shit got real1" <<endl;
+}
+
+void Memcache::Clear_CacheElement(string key)
+{
+
+}
+void Memcache::Clear_CacheAll()
+{
+
 }
 void Memcache::lockAll(){
     log_info<<"In lockall"<<endl;
@@ -266,7 +275,7 @@ string Memcache::process_set(int socket, vector<string> tokens) {
     }
     
     // std::cout << typeid(element).name() << "\n*******************";
-    UpdateCache(key,&element, get_time()); 
+    UpdateCache(key, get_time()); 
     // log_info << "Unlocking " << key[0] << endl;
     Memcache::unlock(key[0]);
     return output;

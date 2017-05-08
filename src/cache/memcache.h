@@ -67,7 +67,9 @@ public:
     int get_memory(uint64_t mem_need);
     uint64_t get_time();
     virtual int Evict(uint64_t mem_need);
-    virtual void UpdateCache(string key,MemcacheElement *e, uint64_t pt);
+    virtual void UpdateCache(string key,  uint64_t pt);
+    virtual void Clear_CacheElement(string key);
+    virtual void Clear_CacheAll();
     string valid_format_storage_commands(vector<string> tokens, bool cas=false);
     string response_get(string key, MemcacheElement elt, bool gets);
     void update_store_fill(MemcacheElement *element,vector<string> tokens, bool just_bytes=false);
