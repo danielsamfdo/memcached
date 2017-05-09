@@ -34,7 +34,7 @@ public:
 // private:
 
 
-	virtual void Clear_CacheElement(string key)
+	void Clear_CacheElement(string key)
 	{
 		MemcacheElement *e = &cache[key];
 		TimeNode *t = e->lastaccess;
@@ -54,7 +54,7 @@ public:
 		}
 
 	}
-    virtual void Clear_CacheAll()
+    void Clear_CacheAll()
     {
     	TimeNode *tp = head;
     	TimeNode *tp2 = nullptr;
@@ -124,6 +124,7 @@ public:
 		*/
 		lockAll();
 		log_info<<"In Evict"<<endl;
+    	log_info<< memcache_stats.allocated<< "  " << capacity << "  " << capacity-memcache_stats.allocated << "  " << mem_need<<endl;
 		uint64_t claimed = 0;
 		uint64_t avail = capacity - memcache_stats.allocated;
 		while(claimed+avail<mem_need)

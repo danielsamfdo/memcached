@@ -140,6 +140,8 @@ void Memcache::Clear_CacheAll()
 {
 
 }
+
+void Memcache::Cache_miss(string key, uint64_t pt){}
 void Memcache::lockAll(){
     log_info<<"In lockall"<<endl;
     for(int i=0;i<NLOCKS;i++)
@@ -255,7 +257,6 @@ string Memcache::process_set(int socket, vector<string> tokens) {
 
     // Get the memory cleared if cache is full
     uint64_t mem_need = element.bytes;
-    log_info<< memcache_stats.allocated<< "  " << capacity << "  " << capacity-memcache_stats.allocated << "  " << mem_need<<endl;
     if (flag)
     {
         // Unlocking the present locked key so that evict can lock all keys
@@ -585,7 +586,7 @@ string Memcache::process_get(int socket, vector<string> keys, bool gets) {
         Memcache::lock(key[0]);
         cache_iterator = cache.find(key);
         if ( cache_iterator == cache.end() ){
-
+            Cache_miss(key,get_time());
         }
         else{
             res = &cache_iterator->second;

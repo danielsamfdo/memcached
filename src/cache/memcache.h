@@ -70,6 +70,7 @@ public:
     virtual void UpdateCache(string key,  uint64_t pt);
     virtual void Clear_CacheElement(string key);
     virtual void Clear_CacheAll();
+    virtual void Cache_miss(string key, uint64_t pt);
     string valid_format_storage_commands(vector<string> tokens, bool cas=false);
     string response_get(string key, MemcacheElement elt, bool gets);
     void update_store_fill(MemcacheElement *element,vector<string> tokens, bool just_bytes=false);

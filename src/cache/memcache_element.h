@@ -23,11 +23,13 @@ class MemcacheElement
     uint64_t exptime;
     uint64_t bytes;
     uint64_t cas_unique;
+    double long credit;
     TimeNode *lastaccess;
 
  	MemcacheElement()
  	{
  		lastaccess = nullptr;
+ 		credit = 0;
  	};
 
 };
