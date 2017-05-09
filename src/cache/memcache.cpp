@@ -575,9 +575,11 @@ string Memcache::process_cas(int socket, vector<string> tokens) {
     cache_iterator = cache.find(key);
     if ( cache_iterator == cache.end() ){
         output = "NOT_FOUND";
+        memcache_stats.cas_misses++;
         // NO ACTION SHOULD BE DONE
     }
     else{
+        memcache_stats.cas_hits++;
         log_info <<key<<" is the key we try to CAS" << endl;
         MemcacheElement element = cache_iterator->second;
         uint64_t tmpsize = element.bytes;
@@ -636,9 +638,13 @@ string Memcache::process_get(int socket, vector<string> keys, bool gets) {
         cache_iterator = cache.find(key);
 
         if ( cache_iterator == cache.end() ){
+            // Get Misses
+            memcache_stats.get_misses++;
             Cache_miss(key,get_time());
         }
         else{
+            memcache_stats.get_hits++;
+
             res = &cache_iterator->second;
             string response = response_get(keys[it], *res, gets);
             log_info << "Present in CACHE" << endl;
@@ -690,9 +696,11 @@ string Memcache::process_delete(int socket, vector<string> tokens){
     try {
         cache_iterator = cache.find(key);
         if ( cache_iterator == cache.end() ){
+            memcache_stats.delete_misses++;
             output = "NOT_FOUND";
         }
         else{
+            memcache_stats.delete_hits++;
             res = cache_iterator->second;
             log_info << "Present in CACHE" << endl;
             Clear_CacheElement(key);
@@ -725,8 +733,10 @@ string Memcache::process_incr(int socket, vector<string> tokens){
         cache_iterator = cache.find(key);
         if ( cache_iterator == cache.end() ){
             output = "NOT_FOUND";
+            memcache_stats.incr_misses++;
         }
         else{
+            memcache_stats.incr_hits++;
             res = cache_iterator->second;
             log_info << "Present in CACHE" << endl;
             if(!is_number(res.block) || !is_number(tokens[1]))
@@ -778,9 +788,11 @@ string Memcache::process_decr(int socket, vector<string> tokens){
     try {
         cache_iterator = cache.find(key);
         if ( cache_iterator == cache.end() ){
+            memcache_stats.decr_misses++;
             output = "NOT_FOUND";
         }
         else{
+            memcache_stats.decr_hits++;
             res = cache_iterator->second;
             log_info << "Present in CACHE" << str_cast<uint64_t>(res.block) << endl;
             if(!is_number(res.block) || !is_number(tokens[1]))

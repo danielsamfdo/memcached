@@ -13,6 +13,16 @@ public:
     Statistics()
     {
     	allocated = 0;
+        get_hits = 0;
+        get_misses = 0;
+        incr_hits = 0;
+        incr_misses = 0;
+        decr_misses = 0;
+        decr_hits = 0;
+        cas_hits = 0;
+        cas_misses = 0;
+        delete_hits = 0;
+        delete_misses = 0;
     }
 };
 #include "statistics.cpp"
