@@ -6,7 +6,10 @@
 #include <sstream>
 #include <iomanip>
 #include <ctime>
-
+#include <time.h>
+#include <chrono>
+typedef std::chrono::high_resolution_clock Time_obj;
+typedef std::chrono::high_resolution_clock::time_point time_p;
 using namespace std;
 
 class Logger {

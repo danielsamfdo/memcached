@@ -18,12 +18,15 @@ struct TimeNode
 class MemcacheElement
  {
  public:
+    bool infinite;
    	string block;
     uint16_t flags;
     uint64_t exptime;
     uint64_t bytes;
     uint64_t cas_unique;
     TimeNode *lastaccess;
+    void update_expiration_time(uint64_t current_time, uint64_t val);
+    bool expired(uint64_t current_time);
 
  	MemcacheElement()
  	{
@@ -31,5 +34,5 @@ class MemcacheElement
  	};
 
 };
-
+#include "memcache_element.cpp"
 #endif //MEMCACHED_CLONE_BRUTE_FORCE_MEMCACHE_ELEMENT_H
