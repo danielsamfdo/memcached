@@ -10,8 +10,7 @@
 #include <common/log_util.h>
 #include <common/io_util.h>
 
-#include <time.h>
-#include <chrono>
+
 #include <mutex>
 
 #include "statistics.h"
@@ -31,8 +30,7 @@ protected:
     static unsigned long long cas_uniq_counter;
     uint64_t capacity;
     uint64_t max_val_bytes_possible;
-    typedef std::chrono::high_resolution_clock Time_obj;
-    typedef std::chrono::high_resolution_clock::time_point time_p;
+
 
     time_p time_start;
     std::mutex Mutexvariables[NLOCKS];
@@ -66,6 +64,7 @@ public:
 
     int get_memory(uint64_t mem_need);
     uint64_t get_time();
+    uint64_t get_current_time_in_seconds();
     virtual int Evict(uint64_t mem_need);
     virtual void UpdateCache(string key,  uint64_t pt);
     virtual void Clear_CacheElement(string key);
@@ -74,7 +73,6 @@ public:
     string valid_format_storage_commands(vector<string> tokens, bool cas=false);
     string response_get(string key, MemcacheElement elt, bool gets);
     void update_store_fill(MemcacheElement *element,vector<string> tokens, bool just_bytes=false);
-    void store_fill(vector<string> tokens, MemcacheElement *element);
     // Storage commands
     string process_set(int socket, vector<string> tokens);
     string process_replace(int socket, vector<string> tokens);
@@ -94,12 +92,16 @@ public:
     string process_version();
     void process_flush_all();
     void process_quit(int socket);
-
+    void Operations(string key);
     // Other Locking
     void lock(char key);
     void unlock(char key);
     void lockAll();
     void unlockAll();
+
+    void check_and_evict(string key);
+
+    // uint64_t get_current_time();
 
 };
 

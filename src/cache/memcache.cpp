@@ -1,11 +1,26 @@
-
 unsigned long long Memcache::cas_uniq_counter = 0;
+
+void Memcache::check_and_evict(string key){
+    unordered_map<string, MemcacheElement>::iterator cache_iterator;
+    cache_iterator = cache.find(key);
+    if(cache_iterator!=cache.end()){
+        MemcacheElement *elt = &cache_iterator->second;
+        log_info << " TIME :  " << get_current_time_in_seconds() << " EXPIRED TIME : " << elt->exptime << "   " << elt->expired(get_current_time_in_seconds()) << endl; 
+        if(elt->expired(get_current_time_in_seconds())){
+
+            Clear_CacheElement(key);
+            memcache_stats.allocated-=elt->bytes;
+            cache.erase(key);
+        }
+    }
+    return ;
+}
 
 void Memcache::update_store_fill(MemcacheElement *element,vector<string> tokens, bool just_bytes){
     log_info << " FLAGS " << str_cast<uint16_t>(tokens[0]) << endl;
     element->flags = str_cast<uint16_t>(tokens[0]);
-    log_info << " EXP TIME " << str_cast<int>(tokens[1]) << endl;
-    element->exptime = str_cast<uint64_t>(tokens[1]);
+    element->update_expiration_time(get_current_time_in_seconds() ,str_cast<uint64_t>(tokens[1]));
+    log_info << " EXP TIME " << element->exptime << endl;
     if(!just_bytes)
         element->bytes += str_cast<uint64_t>(tokens[2]);
     else
@@ -15,7 +30,7 @@ void Memcache::update_store_fill(MemcacheElement *element,vector<string> tokens,
 }
 
 string Memcache::process_command(int socket, string command) {
-    log_info << "Processing command " << command.c_str() << endl;
+    log_info << "Time : " << to_string(get_current_time_in_seconds()) << " Processing command " << command.c_str() << endl;
     vector<string> tokens = tokenize(command);
     for(int i=0;i<tokens.size();i++){
         log_info << tokens[i] << endl;
@@ -110,6 +125,12 @@ int Memcache::get_memory(uint64_t mem_need)
 
         return Evict(mem_need);
     }
+}
+
+uint64_t Memcache::get_current_time_in_seconds(){
+    long long ten_power_nine = 1000000000;
+    time_p p = Time_obj::now();
+    return uint64_t((p-time_start).count())/ten_power_nine;
 }
 
 uint64_t Memcache::get_time()
@@ -222,6 +243,12 @@ string Memcache::valid_format_storage_commands(vector<string> tokens, bool cas) 
     return "OK";
 }
 
+void Memcache::Operations(string key){
+    check_and_evict(key);
+    return ;
+}
+
+
 string Memcache::process_set(int socket, vector<string> tokens) {
 
     /** Sample implementation **/
@@ -234,6 +261,7 @@ string Memcache::process_set(int socket, vector<string> tokens) {
     }
     unordered_map<string, MemcacheElement>::iterator cache_iterator;
     string key = tokens[0];
+    Operations(key);
     Memcache::lock(key[0]);
     cache_iterator = cache.find(key);
     // log_info << "Locking " << key[0] << endl;
@@ -296,6 +324,7 @@ string Memcache::process_add(int socket, vector<string> tokens) {
     }
     unordered_map<string, MemcacheElement>::iterator cache_iterator;
     string key = tokens[0];
+    Operations(key);
     Memcache::lock(key[0]);
 
     tokens.erase(tokens.begin());
@@ -357,6 +386,7 @@ string Memcache::process_append(int socket, vector<string> tokens) {
     }
     unordered_map<string, MemcacheElement>::iterator cache_iterator;
     string key = tokens[0];
+    Operations(key);
     Memcache::lock(key[0]);
 
     tokens.erase(tokens.begin());
@@ -403,7 +433,12 @@ string Memcache::process_append(int socket, vector<string> tokens) {
     Memcache::unlock(key[0]);
     return output;
 }
-
+/**
+ * [Memcache::process_prepend description]
+ * @param  socket [description]
+ * @param  tokens [description]
+ * @return        [description]
+ */
 string Memcache::process_prepend(int socket, vector<string> tokens) {
     string output = "";
     string response = valid_format_storage_commands(tokens);
@@ -413,12 +448,13 @@ string Memcache::process_prepend(int socket, vector<string> tokens) {
     }
     unordered_map<string, MemcacheElement>::iterator cache_iterator;
     string key = tokens[0];
+    Operations(key);
     Memcache::lock(key[0]);
     tokens.erase(tokens.begin());
 
     cache_iterator = cache.find(key);
     if ( cache_iterator == cache.end() ){
-        // NO ACTION SHOULD BE DONE
+        output = "CLIENT_ERROR Key not present Cant be fed";
     }
     else{
         MemcacheElement element = cache_iterator->second;
@@ -469,6 +505,7 @@ string Memcache::process_replace(int socket, vector<string> tokens) {
     }
     unordered_map<string, MemcacheElement>::iterator cache_iterator;
     string key = tokens[0];
+    Operations(key);
     Memcache::lock(key[0]);
     tokens.erase(tokens.begin());
 
@@ -523,6 +560,7 @@ string Memcache::process_cas(int socket, vector<string> tokens) {
     }
     unordered_map<string, MemcacheElement>::iterator cache_iterator;
     string key = tokens[0];
+    Operations(key);
     Memcache::lock(key[0]);
     tokens.erase(tokens.begin());
 
@@ -582,6 +620,9 @@ string Memcache::process_get(int socket, vector<string> keys, bool gets) {
     unordered_map<string, MemcacheElement>::iterator cache_iterator;
     MemcacheElement* res;
     for(int it=0;it<keys.size();it++){
+        check_and_evict(keys[it]);
+    }
+    for(int it=0;it<keys.size();it++){
         string key = keys[it];
         Memcache::lock(key[0]);
         cache_iterator = cache.find(key);
@@ -606,10 +647,6 @@ string Memcache::process_get(int socket, vector<string> keys, bool gets) {
 
     return output;
     // return "yo";
-}
-
-void Memcache::store_fill(vector<string> tokens, MemcacheElement *element) {
-
 }
 
 string Memcache::process_version(){
@@ -639,6 +676,7 @@ string Memcache::process_delete(int socket, vector<string> tokens){
     unordered_map<string, MemcacheElement>::iterator cache_iterator;
     MemcacheElement res;
     string key = tokens[0];
+    Operations(key);
     Memcache::lock(key[0]);
     try {
         cache_iterator = cache.find(key);
@@ -672,6 +710,7 @@ string Memcache::process_incr(int socket, vector<string> tokens){
     unordered_map<string, MemcacheElement>::iterator cache_iterator;
     MemcacheElement res;
     string key = tokens[0];
+    Operations(key);
     Memcache::lock(key[0]);
     try {
         cache_iterator = cache.find(key);
@@ -725,6 +764,7 @@ string Memcache::process_decr(int socket, vector<string> tokens){
     unordered_map<string, MemcacheElement>::iterator cache_iterator;
     MemcacheElement res;
     string key = tokens[0];
+    Operations(key);
     Memcache::lock(key[0]);
     try {
         cache_iterator = cache.find(key);
