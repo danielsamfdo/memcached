@@ -582,9 +582,11 @@ string Memcache::process_get(int socket, vector<string> keys, bool gets) {
     unordered_map<string, MemcacheElement>::iterator cache_iterator;
     MemcacheElement* res;
     for(int it=0;it<keys.size();it++){
+        log_info<<"CM"<<endl;
         string key = keys[it];
         Memcache::lock(key[0]);
         cache_iterator = cache.find(key);
+
         if ( cache_iterator == cache.end() ){
             Cache_miss(key,get_time());
         }
