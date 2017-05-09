@@ -93,7 +93,7 @@ public:
     // Misc Commands
     string process_version();
     string process_stats();
-    void process_flush_all();
+    string process_flush_all();
     void process_quit(int socket);
     void Operations(string key);
     // Other Locking

@@ -79,7 +79,7 @@ string Memcache::process_command(int socket, string command) {
             break;
         case OPERATIONS::flush_all :
             log_info << "FLUSH ALL METHOD " << endl;
-            process_flush_all();
+            output = process_flush_all();
             break;
         case OPERATIONS::bg_gets :
             log_info << "GETS METHOD " << endl;
@@ -679,14 +679,14 @@ void Memcache::process_quit(int socket){
     // return "1.5.8";
 }
 
-void Memcache::process_flush_all(){
+string Memcache::process_flush_all(){
     memcache_stats.cmd_flush++;
     Memcache::lockAll();
     Clear_CacheAll();
     cache.clear();
     memcache_stats.allocated = 0;
     Memcache::unlockAll();
-    return ;
+    return "OK";
 }
 
 string Memcache::process_delete(int socket, vector<string> tokens){
