@@ -634,6 +634,7 @@ string Memcache::process_get(int socket, vector<string> keys, bool gets) {
         string key = keys[it];
         Memcache::lock(key[0]);
         cache_iterator = cache.find(key);
+
         if ( cache_iterator == cache.end() ){
             Cache_miss(key,get_time());
         }

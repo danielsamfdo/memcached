@@ -21,6 +21,7 @@ public:
 	{
 		pt /= div;
 		miss_map[key] = pt;
+		log_info<<"CM"<<endl;
 	}
     
 
@@ -67,6 +68,11 @@ public:
 		while(claimed+avail<mem_need)
 		{
 			unordered_map<string, MemcacheElement>::iterator cache_iterator;
+			if (cache.begin() == cache.end())
+			{
+				unlockAll();
+				return 0;
+			}
 			// Find delta - 1st iteration
 			double long min_delta = cache.begin()->second.credit/cache.begin()->second.bytes;
 			for (cache_iterator=cache.begin(); cache_iterator!=cache.end(); ++cache_iterator){
