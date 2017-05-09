@@ -111,7 +111,8 @@ string Memcache::process_command(int socket, string command) {
 }
 
 string Memcache::process_stats(){
-    return memcache_stats.process_get_statistics();
+    memcache_stats.curr_items = cache.size();
+    return memcache_stats.process_get_statistics(get_current_time_in_seconds(),process_version());
 }
 
 unsigned long long Memcache::get_cas_counter(){

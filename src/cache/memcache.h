@@ -57,6 +57,7 @@ public:
         operation.insert(pair<string,int>("stats",OPERATIONS::stats) );
         // cas_uniq_counter = 0 ;
         time_start = Time_obj::now();
+        memcache_stats.limit_maxbytes = capacity;
 
     }
     Statistics memcache_stats;
