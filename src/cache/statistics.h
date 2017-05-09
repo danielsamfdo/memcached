@@ -23,6 +23,9 @@ public:
         cas_misses = 0;
         delete_hits = 0;
         delete_misses = 0;
+        cmd_set = 0;
+        cmd_get = 0;
+        cmd_flush = 0;
     }
 };
 #include "statistics.cpp"

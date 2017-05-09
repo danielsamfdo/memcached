@@ -261,7 +261,7 @@ void Memcache::Operations(string key){
 string Memcache::process_set(int socket, vector<string> tokens) {
 
     /** Sample implementation **/
-    
+    memcache_stats.cmd_set++;
     string output;
     string response = valid_format_storage_commands(tokens);
     if(response != "OK"){
@@ -628,6 +628,7 @@ string Memcache::process_cas(int socket, vector<string> tokens) {
 
 string Memcache::process_get(int socket, vector<string> keys, bool gets) {
     string output = "";
+    memcache_stats.cmd_get++;
     unordered_map<string, MemcacheElement>::iterator cache_iterator;
     MemcacheElement* res;
     for(int it=0;it<keys.size();it++){
@@ -679,6 +680,7 @@ void Memcache::process_quit(int socket){
 }
 
 void Memcache::process_flush_all(){
+    memcache_stats.cmd_flush++;
     Memcache::lockAll();
     Clear_CacheAll();
     cache.clear();
