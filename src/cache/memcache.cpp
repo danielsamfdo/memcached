@@ -97,6 +97,10 @@ string Memcache::process_command(int socket, string command) {
             log_info << "DELETE METHOD " << endl;
             output = process_delete(socket, tokens);
             break;
+        case OPERATIONS::stats :
+            log_info << "STATS METHOD " << endl;
+            output = process_stats();
+            break;
         default:
             log_info << "NO OTHER METHOD " << endl;
             output = "ERROR";
@@ -104,6 +108,10 @@ string Memcache::process_command(int socket, string command) {
     }
     
     return output;
+}
+
+string Memcache::process_stats(){
+    return memcache_stats.process_get_statistics();
 }
 
 unsigned long long Memcache::get_cas_counter(){

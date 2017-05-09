@@ -16,7 +16,7 @@
 #include "statistics.h"
 #define NLOCKS 257
 using namespace std;
-enum OPERATIONS{set=1, add=2, replace=3, append=4, prepend=5, cas=6, get=7, version=8, quit=9, bg_gets=10, del=11, incr=12, decr=13, flush_all=14};
+enum OPERATIONS{set=1, add=2, replace=3, append=4, prepend=5, cas=6, get=7, version=8, quit=9, bg_gets=10, del=11, incr=12, decr=13, flush_all=14, stats=15};
 
 class Memcache {
 
@@ -54,6 +54,7 @@ public:
         operation.insert(pair<string,int>("delete",OPERATIONS::del) );
         operation.insert(pair<string,int>("incr",OPERATIONS::incr) );
         operation.insert(pair<string,int>("decr",OPERATIONS::decr) );
+        operation.insert(pair<string,int>("stats",OPERATIONS::stats) );
         // cas_uniq_counter = 0 ;
         time_start = Time_obj::now();
 
@@ -90,6 +91,7 @@ public:
 
     // Misc Commands
     string process_version();
+    string process_stats();
     void process_flush_all();
     void process_quit(int socket);
     void Operations(string key);
