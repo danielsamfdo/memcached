@@ -3,6 +3,7 @@ string Statistics::process_get_statistics(uint64_t ut, string version) {
     string output = "";
     output += "Uptime: " + to_string(ut) + "\n";
     output += "Version: " + version + "\n";
+    output += "Bytes: " + to_string(allocated) + "\n";
     output += "Curr_items: " + to_string(curr_items) + "\n";    
     output += "Limit MaxBytes: " + to_string(limit_maxbytes) + "\n";
     output += "Cmd_get: " + to_string(cmd_get) + "\n";

@@ -1,3 +1,14 @@
+Steps :
+
+
+Perform Make
+./memo 200m --random
+./memo 200m --lru
+./memo 200m --landlord
+
+200m corresponds to 200 mega bytes
+
+
 Project 3 - Memo (a memcached clone)
 
 For this project, you will write a multithreaded server that
